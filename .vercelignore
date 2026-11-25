@@ -1,8 +1,0 @@
-.git
-.env*
-artifacts
-tests
-scripts
-docs
-node_modules
-.next
