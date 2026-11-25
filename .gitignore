@@ -14,3 +14,6 @@ pages-on.mjs
 dbg-*.mjs
 verify-*.mjs
 serve*.mjs
+tsconfig.tsbuildinfo
+.serve*.log
+.server.log
