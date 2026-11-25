@@ -1,0 +1,138 @@
+{
+  "text": "I need a little more time, but I want to answer this in my own words.",
+  "language": "english",
+  "voice": "en-US-AvaMultilingualNeural",
+  "sampleRate": 24000,
+  "firstAudioMs": 0,
+  "audioBytes": 22176,
+  "durationMs": 3338,
+  "wordTimingReceived": true,
+  "frames": [
+    {
+      "type": "FlushDone",
+      "flush_id": 0,
+      "audio_duration_ms": 3338
+    },
+    {
+      "type": "WordBoundaries",
+      "flush_id": 0,
+      "audio_start_ms": 0,
+      "words": [
+        {
+          "word": "I",
+          "start": 100,
+          "end": 200,
+          "confidence": 1.0
+        },
+        {
+          "word": "need",
+          "start": 200,
+          "end": 425,
+          "confidence": 1.0
+        },
+        {
+          "word": "a",
+          "start": 438,
+          "end": 475,
+          "confidence": 1.0
+        },
+        {
+          "word": "little",
+          "start": 488,
+          "end": 712,
+          "confidence": 1.0
+        },
+        {
+          "word": "more",
+          "start": 712,
+          "end": 875,
+          "confidence": 1.0
+        },
+        {
+          "word": "time",
+          "start": 888,
+          "end": 1300,
+          "confidence": 1.0
+        },
+        {
+          "word": "but",
+          "start": 1325,
+          "end": 1550,
+          "confidence": 1.0
+        },
+        {
+          "word": "I",
+          "start": 1562,
+          "end": 1638,
+          "confidence": 1.0
+        },
+        {
+          "word": "want",
+          "start": 1650,
+          "end": 1812,
+          "confidence": 1.0
+        },
+        {
+          "word": "to",
+          "start": 1825,
+          "end": 1875,
+          "confidence": 1.0
+        },
+        {
+          "word": "answer",
+          "start": 1888,
+          "end": 2200,
+          "confidence": 1.0
+        },
+        {
+          "word": "this",
+          "start": 2212,
+          "end": 2388,
+          "confidence": 1.0
+        },
+        {
+          "word": "in",
+          "start": 2400,
+          "end": 2462,
+          "confidence": 1.0
+        },
+        {
+          "word": "my",
+          "start": 2475,
+          "end": 2650,
+          "confidence": 1.0
+        },
+        {
+          "word": "own",
+          "start": 2662,
+          "end": 2825,
+          "confidence": 1.0
+        },
+        {
+          "word": "words",
+          "start": 2838,
+          "end": 3338,
+          "confidence": 1.0
+        }
+      ]
+    }
+  ],
+  "words": [
+    "I",
+    "need",
+    "a",
+    "little",
+    "more",
+    "time",
+    "but",
+    "I",
+    "want",
+    "to",
+    "answer",
+    "this",
+    "in",
+    "my",
+    "own",
+    "words"
+  ]
+}

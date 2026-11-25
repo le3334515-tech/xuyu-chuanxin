@@ -1,0 +1,152 @@
+{
+  "text": "I want to answer for myself. Give me a moment, and I will tell you what I need.",
+  "language": "english",
+  "voice": "en-US-AvaMultilingualNeural",
+  "sampleRate": 24000,
+  "firstAudioMs": 0,
+  "audioBytes": 27504,
+  "durationMs": 4200,
+  "wordTimingReceived": true,
+  "frames": [
+    {
+      "type": "FlushDone",
+      "flush_id": 0,
+      "audio_duration_ms": 4200
+    },
+    {
+      "type": "WordBoundaries",
+      "flush_id": 0,
+      "audio_start_ms": 0,
+      "words": [
+        {
+          "word": "I",
+          "start": 100,
+          "end": 175,
+          "confidence": 1.0
+        },
+        {
+          "word": "want",
+          "start": 188,
+          "end": 350,
+          "confidence": 1.0
+        },
+        {
+          "word": "to",
+          "start": 362,
+          "end": 412,
+          "confidence": 1.0
+        },
+        {
+          "word": "answer",
+          "start": 425,
+          "end": 775,
+          "confidence": 1.0
+        },
+        {
+          "word": "for",
+          "start": 775,
+          "end": 888,
+          "confidence": 1.0
+        },
+        {
+          "word": "myself",
+          "start": 888,
+          "end": 1550,
+          "confidence": 1.0
+        },
+        {
+          "word": "Give",
+          "start": 1938,
+          "end": 2062,
+          "confidence": 1.0
+        },
+        {
+          "word": "me",
+          "start": 2075,
+          "end": 2200,
+          "confidence": 1.0
+        },
+        {
+          "word": "a",
+          "start": 2212,
+          "end": 2250,
+          "confidence": 1.0
+        },
+        {
+          "word": "moment",
+          "start": 2262,
+          "end": 2738,
+          "confidence": 1.0
+        },
+        {
+          "word": "and",
+          "start": 2750,
+          "end": 2938,
+          "confidence": 1.0
+        },
+        {
+          "word": "I",
+          "start": 3038,
+          "end": 3112,
+          "confidence": 1.0
+        },
+        {
+          "word": "will",
+          "start": 3112,
+          "end": 3212,
+          "confidence": 1.0
+        },
+        {
+          "word": "tell",
+          "start": 3225,
+          "end": 3425,
+          "confidence": 1.0
+        },
+        {
+          "word": "you",
+          "start": 3438,
+          "end": 3525,
+          "confidence": 1.0
+        },
+        {
+          "word": "what",
+          "start": 3525,
+          "end": 3650,
+          "confidence": 1.0
+        },
+        {
+          "word": "I",
+          "start": 3662,
+          "end": 3738,
+          "confidence": 1.0
+        },
+        {
+          "word": "need",
+          "start": 3738,
+          "end": 4200,
+          "confidence": 1.0
+        }
+      ]
+    }
+  ],
+  "words": [
+    "I",
+    "want",
+    "to",
+    "answer",
+    "for",
+    "myself",
+    "Give",
+    "me",
+    "a",
+    "moment",
+    "and",
+    "I",
+    "will",
+    "tell",
+    "you",
+    "what",
+    "I",
+    "need"
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "text": "我自己来回答。给我一点时间，我会告诉你我需要什么。",
+  "language": "chinese",
+  "voice": "zh-CN-XiaoxiaoNeural",
+  "sampleRate": 24000,
+  "firstAudioMs": 0,
+  "audioBytes": 33120,
+  "durationMs": 4925,
+  "wordTimingReceived": true,
+  "frames": [
+    {
+      "type": "FlushDone",
+      "flush_id": 0,
+      "audio_duration_ms": 4925
+    },
+    {
+      "type": "WordBoundaries",
+      "flush_id": 0,
+      "audio_start_ms": 0,
+      "words": [
+        {
+          "word": "我",
+          "start": 100,
+          "end": 238,
+          "confidence": 1.0
+        },
+        {
+          "word": "自己",
+          "start": 250,
+          "end": 612,
+          "confidence": 1.0
+        },
+        {
+          "word": "来",
+          "start": 612,
+          "end": 775,
+          "confidence": 1.0
+        },
+        {
+          "word": "回答",
+          "start": 788,
+          "end": 1288,
+          "confidence": 1.0
+        },
+        {
+          "word": "给",
+          "start": 1862,
+          "end": 2012,
+          "confidence": 1.0
+        },
+        {
+          "word": "我",
+          "start": 2012,
+          "end": 2100,
+          "confidence": 1.0
+        },
+        {
+          "word": "一点",
+          "start": 2112,
+          "end": 2400,
+          "confidence": 1.0
+        },
+        {
+          "word": "时间",
+          "start": 2412,
+          "end": 2900,
+          "confidence": 1.0
+        },
+        {
+          "word": "我",
+          "start": 3162,
+          "end": 3275,
+          "confidence": 1.0
+        },
+        {
+          "word": "会",
+          "start": 3275,
+          "end": 3400,
+          "confidence": 1.0
+        },
+        {
+          "word": "告诉",
+          "start": 3412,
+          "end": 3725,
+          "confidence": 1.0
+        },
+        {
+          "word": "你",
+          "start": 3725,
+          "end": 3850,
+          "confidence": 1.0
+        },
+        {
+          "word": "我",
+          "start": 3850,
+          "end": 4150,
+          "confidence": 1.0
+        },
+        {
+          "word": "需要",
+          "start": 4238,
+          "end": 4538,
+          "confidence": 1.0
+        },
+        {
+          "word": "什么",
+          "start": 4550,
+          "end": 4925,
+          "confidence": 1.0
+        }
+      ]
+    }
+  ]
+}

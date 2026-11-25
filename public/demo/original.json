@@ -1,0 +1,114 @@
+{
+  "text": "我需要一点时间，但这句话我想用自己的话说。",
+  "language": "chinese",
+  "voice": "zh-CN-XiaoxiaoNeural",
+  "sampleRate": 24000,
+  "firstAudioMs": 0,
+  "audioBytes": 27216,
+  "durationMs": 3975,
+  "wordTimingReceived": true,
+  "frames": [
+    {
+      "type": "FlushDone",
+      "flush_id": 0,
+      "audio_duration_ms": 3975
+    },
+    {
+      "type": "WordBoundaries",
+      "flush_id": 0,
+      "audio_start_ms": 0,
+      "words": [
+        {
+          "word": "我",
+          "start": 100,
+          "end": 250,
+          "confidence": 1.0
+        },
+        {
+          "word": "需要",
+          "start": 250,
+          "end": 512,
+          "confidence": 1.0
+        },
+        {
+          "word": "一点",
+          "start": 525,
+          "end": 788,
+          "confidence": 1.0
+        },
+        {
+          "word": "时间",
+          "start": 800,
+          "end": 1325,
+          "confidence": 1.0
+        },
+        {
+          "word": "但",
+          "start": 1662,
+          "end": 1825,
+          "confidence": 1.0
+        },
+        {
+          "word": "这",
+          "start": 1838,
+          "end": 1988,
+          "confidence": 1.0
+        },
+        {
+          "word": "句",
+          "start": 1988,
+          "end": 2112,
+          "confidence": 1.0
+        },
+        {
+          "word": "话",
+          "start": 2112,
+          "end": 2450,
+          "confidence": 1.0
+        },
+        {
+          "word": "我",
+          "start": 2550,
+          "end": 2675,
+          "confidence": 1.0
+        },
+        {
+          "word": "想",
+          "start": 2675,
+          "end": 2850,
+          "confidence": 1.0
+        },
+        {
+          "word": "用",
+          "start": 2862,
+          "end": 3012,
+          "confidence": 1.0
+        },
+        {
+          "word": "自己",
+          "start": 3038,
+          "end": 3325,
+          "confidence": 1.0
+        },
+        {
+          "word": "的",
+          "start": 3325,
+          "end": 3438,
+          "confidence": 1.0
+        },
+        {
+          "word": "话",
+          "start": 3438,
+          "end": 3650,
+          "confidence": 1.0
+        },
+        {
+          "word": "说",
+          "start": 3650,
+          "end": 3975,
+          "confidence": 1.0
+        }
+      ]
+    }
+  ]
+}

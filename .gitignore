@@ -1,0 +1,13 @@
+node_modules/
+.next/
+out/
+*.log
+.shot*.png
+bi-*.png
+shot-*.png
+test-out.json
+patch*.py
+scan-en.mjs
+test-*.mjs
+shot-*.mjs
+dbg-*.mjs
