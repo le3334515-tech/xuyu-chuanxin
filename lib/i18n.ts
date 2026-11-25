@@ -193,6 +193,7 @@ type Copy = {
     playbackTitle: string;
     atYourPace: string;
     reviseThis: string;
+    tryRecordedExample: string;
     showTextInstead: string;
     historyTitle: string;
     clearRecord: string;
@@ -455,6 +456,7 @@ export const COPY: Record<Lang, Copy> = {
       playbackTitle: "播放",
       atYourPace: "按你的节奏",
       reviseThis: "修订这句",
+      tryRecordedExample: "试试示例录音",
       showTextInstead: "改为显示文字",
       historyTitle: "这段对话",
       clearRecord: "清空记录",
@@ -731,6 +733,7 @@ export const COPY: Record<Lang, Copy> = {
       playbackTitle: "Playback",
       atYourPace: "At your pace",
       reviseThis: "Revise this message",
+      tryRecordedExample: "Try the recorded example",
       showTextInstead: "Show text instead",
       historyTitle: "In this conversation",
       clearRecord: "Clear record",

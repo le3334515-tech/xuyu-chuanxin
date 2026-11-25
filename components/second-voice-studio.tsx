@@ -717,7 +717,7 @@ export function SecondVoiceStudio({
                   <Eye size={15} />
                   {c.studio.showTextInstead}
                 </button>
-                <span className="error-hint">{c.assist.tryRecorded}</span>
+                <Link href="/#experience">{c.studio.tryRecordedExample}</Link>
               </div>
             )}
             <div className="history-section">
