@@ -131,7 +131,12 @@ export function SecondVoiceStudio({
   const active = status === "connecting" || status === "speaking";
   const voices = useMemo(() => voiceOptions(language), [language, voiceTick]);
   const selectedVoice = voices.find((item) => item.id === voice) ?? voices[0];
-  const wordCount = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const wordCount = useMemo(() => {
+    const trimmed = text.trim();
+    if (!trimmed) return 0;
+    // 中文按字计，英文按词计 —— 与原版「word count」在各自语言下的直觉一致
+    return lang === "en" ? trimmed.split(/\s+/).length : [...trimmed.replace(/\s+/g, "")].length;
+  }, [text, lang]);
   const hasText = Boolean(text.trim());
   const isSaved = saved.some(
     (phrase) => phrase.toLowerCase() === text.trim().toLowerCase(),
@@ -532,7 +537,7 @@ export function SecondVoiceStudio({
                 {c.studio.voice}
                 <select
                   value={voice}
-                  disabled={active}
+                  disabled={active || !voices.some((item) => item.id)}
                   onChange={(event) => {
                     stopPreview();
                     setVoice(event.target.value);
