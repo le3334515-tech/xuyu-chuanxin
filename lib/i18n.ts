@@ -277,6 +277,11 @@ type Copy = {
     keyProviderBrowser: string;
     keyProviderSf: string;
     keyProviderAai: string;
+    noticeClarified: (ms: number) => string;
+    noticeFallback: string;
+    fragmentLabel: string;
+    authorship: string;
+    authorshipHint: string;
     engineBuiltin: string;
     engineBrowser: string;
     engineSf: string;
@@ -559,6 +564,11 @@ export const COPY: Record<Lang, Copy> = {
       keyProviderBrowser: "浏览器自带（免费）",
       keyProviderSf: "硅基流动 · 国内可充值",
       keyProviderAai: "AssemblyAI · 海外",
+      noticeClarified: (ms) => `听清了大致意思（${ms} 毫秒）。下面是几条通顺的说法，选一条，或者自己改。`,
+      noticeFallback: "这几条是按常见说法给的，不一定是你想说的。可以自己改，或者再说一次。",
+      fragmentLabel: "识别到的片段",
+      authorship: "你永远是表达的主人",
+      authorshipHint: "AI 只负责把话理顺，选哪句、怎么改、什么时候念，都由你决定。",
       engineBuiltin: "当前已启用云端识别，开箱可用，不用配置。",
       engineBrowser: "当前用的是浏览器自带识别（可能受网络限制）。",
       engineSf: "当前用的是硅基流动语音识别。",
@@ -856,6 +866,11 @@ export const COPY: Record<Lang, Copy> = {
       keyProviderBrowser: "Browser built-in (free)",
       keyProviderSf: "SiliconFlow · China",
       keyProviderAai: "AssemblyAI · global",
+      noticeClarified: (ms) => `Got the gist (${ms} ms). Pick one of these, or edit it yourself.`,
+      noticeFallback: "These are common phrasings — not necessarily what you meant. Edit, or say it again.",
+      fragmentLabel: "Recognised fragment",
+      authorship: "You are always the author",
+      authorshipHint: "The model only smooths the words. You choose the sentence, edit it, and decide when it speaks.",
       engineBuiltin: "Cloud recognition is on and ready — nothing to configure.",
       engineBrowser: "Using the browser's built-in recognition (may be blocked).",
       engineSf: "Using SiliconFlow recognition.",

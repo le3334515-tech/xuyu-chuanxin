@@ -3383,3 +3383,43 @@ html[lang^="zh"] .studio-content .workspace-intro h1 {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.35; }
 }
+
+/* 识别片段：让用户看到 AI 是从什么猜出来的 */
+.heard-fragment {
+  margin: 10px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+  padding-left: 10px;
+  border-left: 2px solid var(--line);
+  word-break: break-word;
+}
+.heard-fragment span {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint, #8b8397);
+  margin-bottom: 3px;
+}
+
+/* 「你永远是表达的主人」—— 一句话表明 AI 不替你说话 */
+.authorship-note {
+  margin: 6px 0 0;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.authorship-note::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--soft);
+  box-shadow: inset 0 0 0 1.5px var(--signal);
+  flex: none;
+}

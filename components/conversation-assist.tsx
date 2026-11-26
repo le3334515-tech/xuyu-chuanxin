@@ -27,6 +27,7 @@ import {
   type ProviderId,
 } from "@/lib/speech/zh-listen";
 import { suggestReplies } from "@/lib/speech/zh-replies";
+import { clarifySpeech, looksBroken } from "@/lib/speech/clarify";
 import { useCopy } from "@/components/lang-provider";
 
 export type ConversationHandle = { cancel: () => void };
@@ -82,6 +83,8 @@ export function ConversationAssist({
   const session = useRef<ListenSession | null>(null);
   const request = useRef<AbortController | null>(null);
   const questionEditor = useRef<HTMLDetailsElement>(null);
+  const lastQuestion = useRef("");
+  const [fragments, setFragments] = useState("");
   const version = useRef(0);
   const busy = phase === "connecting" || phase === "listening" || phase === "thinking";
 
@@ -132,17 +135,53 @@ export function ConversationAssist({
     setQuestion(text);
     setPhase("thinking");
     setNotice(c.assist.noticeThinking);
-    try {
-      const next = suggestReplies(text, meaning, language === "english" ? "en" : "zh");
+    const lang: "zh" | "en" = language === "english" ? "en" : "zh";
+
+    // 打着「按我的意思重写」时不需要猜，直接按意思成句
+    if (meaning.trim()) {
+      const next = suggestReplies(text, meaning, lang);
       if (id !== version.current) return;
       setReplies(next);
       setPhase("ready");
-      setNotice(meaning ? c.assist.noticeShaped : c.assist.noticeReady);
-    } catch {
-      if (id !== version.current) return;
-      setPhase("error");
-      setNotice(c.assist.noticeError);
+      setNotice(c.assist.noticeShaped);
+      return;
     }
+
+    // 两种输入走两条路：
+    //  - 破碎片段（说话不清楚）→ 补成「你想说的那句话」
+    //  - 完整问句（对方在问）→ 给出三条回复
+    const raw = text.trim();
+    const broken = looksBroken(raw);
+
+    if (!broken) {
+      lastQuestion.current = raw;
+      const next = suggestReplies(raw, "", lang);
+      if (id !== version.current) return;
+      setFragments("");
+      setReplies(next);
+      setPhase("ready");
+      setNotice(c.assist.noticeReady);
+      return;
+    }
+
+    // 破碎：交给模型结合上下文猜意思
+    const clarified = await clarifySpeech(raw, lastQuestion.current, lang);
+    if (id !== version.current) return;
+
+    if (clarified.candidates.length) {
+      setFragments(raw);
+      setReplies(clarified.candidates);
+      setPhase("ready");
+      setNotice(c.assist.noticeClarified(clarified.ms));
+      return;
+    }
+
+    // 模型不可用：回落到本地规则，仍然让用户有得选
+    const fallback = suggestReplies(raw, "", lang);
+    setFragments(raw);
+    setReplies(fallback);
+    setPhase("ready");
+    setNotice(c.assist.noticeFallback);
   }
 
   function start(recorded = false) {
@@ -349,6 +388,12 @@ export function ConversationAssist({
           <p className="heard-question">
             {question || (phase === "listening" ? c.assist.listening : c.assist.whatBack)}
           </p>
+          {fragments && (
+            <p className="heard-fragment">
+              <span>{c.assist.fragmentLabel}</span>
+              {fragments}
+            </p>
+          )}
           {(phase === "listening" || phase === "thinking") && (
             <div className="listening-bars" aria-hidden="true" data-live={level > 0.02 ? "1" : "0"}>
               {Array.from({ length: 16 }, (_, i) => {
@@ -443,6 +488,9 @@ export function ConversationAssist({
         </div>
         <div className="reply-panel" aria-busy={phase === "thinking"}>
           <span className="conversation-label">{c.assist.possibleReplies}</span>
+          <p className="authorship-note" title={c.assist.authorshipHint}>
+            {c.assist.authorship}
+          </p>
           {replies.length ? (
             <div className="reply-options">
               {replies.map((reply, index) => (
