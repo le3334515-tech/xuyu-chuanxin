@@ -9,7 +9,11 @@
  * 所以纯静态站点可以直连，key 只存在本机。
  */
 
-import { BUILTIN_PROVIDER, builtinKey } from "@/lib/speech/builtin-key";
+import {
+  BUILTIN_PROVIDER,
+  assemblyaiKey,
+  siliconflowKey,
+} from "@/lib/speech/builtin-key";
 
 export type ListenEvents = {
   onReady: () => void;
@@ -84,7 +88,7 @@ export type StoredConfig = {
   key: string;
 };
 
-const BUILTIN: StoredConfig = { provider: BUILTIN_PROVIDER, key: builtinKey() };
+const BUILTIN: StoredConfig = { provider: BUILTIN_PROVIDER, key: siliconflowKey() };
 
 /**
  * 存储里只认「用户亲自保存过」的配置（带 source: "user"）。
@@ -372,11 +376,29 @@ export class CloudTranscribeSession {
     });
   }
 
+  /** 硅基流动超时就换 AssemblyAI，别让用户干等 */
+  private static readonly SF_TIMEOUT_MS = 7000;
+
   private async transcribe(wav: Blob) {
     if (this.config.provider === "assemblyai") {
       await this.transcribeAssemblyAI(wav);
       return;
     }
+    const result = await this.trySiliconFlow(wav);
+    if (result === "ok" || this.closed) return;
+    // 国内链路抽风时（实测偶尔 30 秒不返回），自动用备用凭据再试一次
+    const fallback = assemblyaiKey();
+    if (result === "slow" && fallback) {
+      this.config = { provider: "assemblyai", key: fallback };
+      this.events.onTranscript(
+        this.lang === "en" ? "Switching to backup…" : "换条线路，稍等…",
+      );
+      await this.transcribeAssemblyAI(wav);
+      return;
+    }
+  }
+
+  private async trySiliconFlow(wav: Blob): Promise<"ok" | "slow" | "failed"> {
     const provider = PROVIDERS.siliconflow;
     try {
       const form = new FormData();
@@ -388,7 +410,7 @@ export class CloudTranscribeSession {
         method: "POST",
         headers: { Authorization: `Bearer ${this.config.key}` },
         body: form,
-        signal: AbortSignal.timeout(45_000),
+        signal: AbortSignal.timeout(CloudTranscribeSession.SF_TIMEOUT_MS),
       });
       const text = await response.text();
       let payload: any = null;
@@ -401,13 +423,11 @@ export class CloudTranscribeSession {
       if (!response.ok) {
         const detail =
           payload?.message || payload?.error?.message || payload?.detail || `HTTP ${response.status}`;
-        this.close();
-        this.events.onError(
+        return this.finishWithError(
           this.lang === "en"
             ? `The speech service refused the request (${detail}).`
             : `语音服务拒绝了这次请求（${detail}）。`,
         );
-        return;
       }
 
       const transcript = String(payload?.text ?? "").trim();
@@ -418,22 +438,27 @@ export class CloudTranscribeSession {
             ? "Nothing was recognised. Try again, closer to the microphone."
             : "没听清。靠近一点再说一次，或者把问题打出来。",
         );
-        return;
+        return "failed";
       }
       this.close();
       this.events.onQuestion(transcript.slice(0, 700));
+      return "ok";
     } catch (error) {
-      this.close();
-      this.events.onError(
-        error instanceof Error && error.name === "TimeoutError"
-          ? this.lang === "en"
-            ? "Transcription timed out. Try again, or type the question."
-            : "转写超时了。再试一次，或者把问题打出来。"
-          : this.lang === "en"
-            ? "Couldn't reach the speech service. Check the network."
-            : "连不上语音服务。检查一下网络。",
+      const timedOut = error instanceof Error && error.name === "TimeoutError";
+      if (timedOut) return "slow";
+      return this.finishWithError(
+        this.lang === "en"
+          ? "Couldn't reach the speech service. Check the network."
+          : "连不上语音服务。检查一下网络。",
       );
     }
+  }
+
+  /** 报错并告知调用方「这条线路失败」 */
+  private finishWithError(message: string): "failed" {
+    this.close();
+    this.events.onError(message);
+    return "failed";
   }
 
   private stopCapture() {
