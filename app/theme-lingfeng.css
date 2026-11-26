@@ -1,0 +1,518 @@
+/* ============================================================
+   聆风三客 · 视觉系统
+   ------------------------------------------------------------
+   只加样式，不加一个字，不动任何功能。
+   母题取自团队名「聆风」：风是没有形状的，只能看见它经过的东西
+   —— 波纹、倾斜的线、被吹动的纸。所以用这三种痕迹做视觉语言。
+
+   一、印：品牌标记做成朱砂方章（三人 = 三波浪）
+   二、纹：纸面带极淡的横向帘纹，像宣纸
+   三、痕：分区间用风痕线收口，标题下一道笔触
+   四、字：标题加一点墨色的不均匀感，不是纯色填充
+   ============================================================ */
+
+:root {
+  --seal: #b63a26;
+  --seal-soft: rgba(182, 58, 38, 0.1);
+  --wind: rgba(28, 26, 23, 0.14);
+  --wind-soft: rgba(28, 26, 23, 0.06);
+}
+
+/* ── 一、印：品牌标记做成朱砂方章 ───────────────────────── */
+
+.brand {
+  gap: 11px;
+}
+
+.brand > svg {
+  box-sizing: content-box;
+  width: 17px;
+  height: 17px;
+  padding: 6px 5px;
+  background: var(--seal);
+  color: #f6f3ec;
+  stroke-width: 2.1;
+  border-radius: 1px;
+  /* 印章的轻微不均：内圈留一道纸边 */
+  box-shadow: inset 0 0 0 1px rgba(246, 243, 236, 0.28);
+  /* 盖上去的手感 */
+  transform: rotate(-1.5deg);
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.brand:hover > svg {
+  transform: rotate(0deg) scale(1.04);
+}
+
+.brand span {
+  font-family: var(--serif);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.brand-dot {
+  color: var(--seal);
+  margin-left: 1px;
+}
+
+/* ── 二、纹：纸面帘纹（宣纸的横向细纹，极淡） ────────────── */
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(28, 26, 23, 0.016) 0px,
+    rgba(28, 26, 23, 0.016) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  /* 边缘淡出，中间最清楚 */
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, #000 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 40%, #000 40%, transparent 100%);
+}
+
+body {
+  position: relative;
+}
+.landing,
+.studio-shell,
+.site-footer {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── 三、痕：风痕线 ───────────────────────────────────── */
+
+/* 分区上沿：一条会「流动」的细线 */
+.trust-section::before,
+.everyday-section::before,
+.phrase-section::after,
+.editorial-section::before {
+  content: "";
+  display: block;
+  height: 1px;
+  width: 100%;
+  background:
+    linear-gradient(90deg, transparent, var(--wind) 12%, var(--wind) 88%, transparent),
+    repeating-linear-gradient(90deg, var(--wind) 0 2px, transparent 2px 7px);
+  background-size: 100% 100%, 100% 1px;
+  opacity: 0.9;
+  margin-bottom: 2px;
+}
+
+/* 主标题下方：一道笔触（左边重、右边散，像落笔收锋） */
+.hero h1::after,
+.workspace-intro h1::after {
+  content: "";
+  display: block;
+  width: 62%;
+  max-width: 320px;
+  height: 7px;
+  margin-top: 14px;
+  background: var(--seal);
+  clip-path: polygon(0 38%, 96% 0, 100% 46%, 88% 100%, 3% 74%);
+  opacity: 0.9;
+  transform: rotate(-0.6deg);
+}
+
+.workspace-intro h1::after {
+  width: 120px;
+  height: 4px;
+  margin-top: 10px;
+  opacity: 0.75;
+}
+
+/* 小标题前的短竖：像书页的标注线 */
+.section-heading::before,
+.closing-section h2::before {
+  content: "";
+  display: block;
+  width: 26px;
+  height: 3px;
+  margin-bottom: 16px;
+  background: var(--seal);
+}
+
+/* 页脚：风痕收口 */
+.site-footer {
+  position: relative;
+  overflow: hidden;
+}
+.site-footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--wind) 0 3px,
+    transparent 3px 9px
+  );
+}
+.site-footer::after {
+  content: "";
+  position: absolute;
+  right: -40px;
+  bottom: -30px;
+  width: 220px;
+  height: 120px;
+  pointer-events: none;
+  background: radial-gradient(ellipse at 50% 50%, var(--wind-soft), transparent 68%);
+}
+
+/* ── 四、字：标题的墨色不均 ───────────────────────────── */
+
+.hero h1,
+.workspace-intro h1,
+.section-heading h2,
+.closing-section h2,
+.trust-heading h2,
+.everyday-copy h2,
+.choreography-toolbar h2,
+.conversation-heading h2,
+.panel-heading h2 {
+  /* 极淡的纸纹压进字里，避免纯色的塑料感 */
+  background-image: linear-gradient(
+    176deg,
+    rgba(28, 26, 23, 0.92) 0%,
+    rgba(28, 26, 23, 1) 46%,
+    rgba(28, 26, 23, 0.94) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: var(--ink);
+}
+
+/* 深色版面里的标题不套这个（会看不见） */
+.choreography-toolbar h2 {
+  background-image: none;
+  -webkit-text-fill-color: var(--on-deep);
+  color: var(--on-deep);
+}
+
+/* 红色那半句：保持实色，保证对比 */
+.hero h1 > span,
+.section-heading h2 span,
+.closing-section h2 span,
+.trust-heading h2 span,
+.everyday-copy h2 span {
+  background-image: none;
+  -webkit-text-fill-color: var(--seal);
+  color: var(--seal);
+}
+
+/* ── 章节切换：编号做成小印章 ─────────────────────────── */
+
+.chapter-switch button[aria-selected="true"] span,
+.chapter-switch button[aria-pressed="true"] span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 17px;
+  height: 15px;
+  padding: 0 3px;
+  background: var(--seal);
+  color: #f6f3ec;
+  border-radius: 1px;
+  font-size: 9px;
+  letter-spacing: 0;
+  opacity: 1;
+}
+
+/* 段落序号也带一点朱砂 */
+.panel-index {
+  border-color: rgba(182, 58, 38, 0.4);
+  color: var(--seal);
+}
+
+/* ── 按钮：加一道朱砂侧标，像书的书脊 ───────────────────── */
+
+.button.primary,
+.listen-button,
+.speak-button {
+  position: relative;
+  overflow: hidden;
+}
+.button.primary::after,
+.listen-button::after,
+.speak-button::after {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: var(--seal);
+}
+
+/* ── 卡片：左上角一个小折角，像图纸 ─────────────────────── */
+
+.feature-card {
+  position: relative;
+}
+.feature-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+  background: linear-gradient(225deg, var(--paper) 50%, transparent 50%);
+  border-left: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+/* ── 候选卡：左侧风痕编号位 ───────────────────────────── */
+
+.reply-option {
+  position: relative;
+  padding-left: 16px;
+}
+.reply-option::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 2px;
+  height: 0;
+  background: var(--seal);
+  transform: translateY(-50%);
+  transition: height 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.reply-option:hover::before,
+.reply-chosen::before {
+  height: 60%;
+}
+
+/* ── 听音面板：滚动时的风线背景 ───────────────────────── */
+
+.conversation-assist::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(28, 26, 23, 0.012) 0 1px,
+    transparent 1px 96px
+  );
+  mask-image: linear-gradient(180deg, #000 0%, transparent 42%);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 42%);
+}
+.conversation-assist {
+  position: relative;
+  overflow: hidden;
+}
+.conversation-assist > * {
+  position: relative;
+}
+
+/* ── 深色版面：加一层风的流线 ─────────────────────────── */
+
+.demo-card::after,
+.choreography-demo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      173deg,
+      rgba(246, 243, 236, 0.028) 0 1px,
+      transparent 1px 26px
+    );
+  mask-image: radial-gradient(ellipse 80% 60% at 30% 20%, #000, transparent 75%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 30% 20%, #000, transparent 75%);
+}
+.demo-card,
+.choreography-demo {
+  position: relative;
+  overflow: hidden;
+}
+.demo-card > *,
+.choreography-demo > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── 无障碍：动效与装饰的退让 ─────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .brand > svg {
+    transform: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .hero h1::after {
+    width: 52%;
+    height: 5px;
+    margin-top: 10px;
+  }
+  .section-heading::before,
+  .closing-section h2::before {
+    width: 20px;
+    height: 2px;
+    margin-bottom: 12px;
+  }
+  .brand > svg {
+    width: 15px;
+    height: 15px;
+    padding: 5px 4px;
+  }
+  .conversation-assist::before {
+    display: none;
+  }
+}
+
+/* 高对比模式：装饰一律让路 */
+.high-contrast body::before,
+.high-contrast .conversation-assist::before,
+.high-contrast .demo-card::after,
+.high-contrast .choreography-demo::after,
+.high-contrast .site-footer::after,
+.high-contrast .feature-card::after {
+  display: none;
+}
+.high-contrast .hero h1,
+.high-contrast .workspace-intro h1,
+.high-contrast .section-heading h2 {
+  background-image: none;
+  -webkit-text-fill-color: #000;
+  color: #000;
+}
+
+/* ════════════════════════════════════════════════════════
+   三客 · 三道风
+   --------------------------------------------------------
+   团队三个人，所以「风」一律以三道的形态出现：
+   页脚、首屏右缘、听音的收口。纯装饰，不带文字。
+   ════════════════════════════════════════════════════════ */
+
+/* 页脚右侧：三道渐弱的风痕 */
+.site-footer::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(300px, 34vw);
+  height: 66px;
+  pointer-events: none;
+  background-image:
+    linear-gradient(90deg, transparent, var(--seal) 55%, transparent 96%),
+    linear-gradient(90deg, transparent, var(--wind) 60%, transparent 96%),
+    linear-gradient(90deg, transparent, var(--wind-soft) 70%, transparent 96%);
+  background-repeat: no-repeat;
+  background-size:
+    100% 1.5px,
+    88% 1px,
+    70% 1px;
+  background-position:
+    0 21px,
+    12% 33px,
+    26% 45px;
+  opacity: 0.85;
+  mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+}
+
+/* 首屏右缘：同样的三道，竖着放，像风走过纸边 */
+.hero::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  top: 18%;
+  width: 34px;
+  height: 46%;
+  pointer-events: none;
+  background-image:
+    linear-gradient(180deg, transparent, var(--seal) 50%, transparent 95%),
+    linear-gradient(180deg, transparent, var(--wind) 55%, transparent 95%),
+    linear-gradient(180deg, transparent, var(--wind-soft) 62%, transparent 95%);
+  background-repeat: no-repeat;
+  background-size:
+    1.5px 100%,
+    1px 82%,
+    1px 62%;
+  background-position:
+    30px 0,
+    20px 9%,
+    10px 19%;
+  opacity: 0.8;
+}
+.hero {
+  position: relative;
+}
+
+/* 听音面板底部收口：风走完了 */
+.conversation-assist::after {
+  content: "";
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 0;
+  height: 1px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--wind) 0 2px,
+    transparent 2px 8px
+  );
+  opacity: 0.7;
+}
+
+/* 笔触与标题贴合紧一点 */
+.hero h1::after {
+  margin-top: 10px;
+  height: 6px;
+  width: 58%;
+}
+
+/* 印章：hover 时轻微「盖下」的位移，不用缩放 */
+.brand:hover > svg {
+  transform: rotate(0deg) translateY(1px);
+}
+
+/* 深色版面的章节选中印章 */
+.chapter-switch button[aria-selected="true"] span,
+.chapter-switch button[aria-pressed="true"] span {
+  min-width: 18px;
+  height: 16px;
+}
+
+/* 页脚署名不再用下划线，用朱砂短条 */
+.site-footer a {
+  border-bottom: 0;
+  position: relative;
+  padding-bottom: 2px;
+}
+.site-footer a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--seal);
+  opacity: 0.5;
+  transition: opacity 0.16s;
+}
+.site-footer a:hover::after {
+  opacity: 1;
+}
+
+@media (max-width: 900px) {
+  .hero::after,
+  .site-footer::after {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reply-option::before {
+    transition: none;
+  }
+}

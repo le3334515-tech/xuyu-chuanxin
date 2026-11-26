@@ -3,6 +3,7 @@ import "@fontsource-variable/instrument-sans";
 import "@fontsource-variable/jetbrains-mono";
 import "./globals.css";
 import "./theme-paper.css";
+import "./theme-lingfeng.css";
 import { LangProvider } from "@/components/lang-provider";
 
 export const metadata: Metadata = {
