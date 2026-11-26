@@ -18,7 +18,13 @@ import {
   Square,
   Volume2,
 } from "lucide-react";
-import { SpeechListenSession as ListenSession, readKey, writeKey } from "@/lib/speech/zh-listen";
+import {
+  SpeechListenSession as ListenSession,
+  PROVIDERS,
+  readConfig,
+  writeConfig,
+  type ProviderId,
+} from "@/lib/speech/zh-listen";
 import { suggestReplies } from "@/lib/speech/zh-replies";
 import { useCopy } from "@/components/lang-provider";
 
@@ -55,7 +61,8 @@ export function ConversationAssist({
   const [notice, setNotice] = useState(c.assist.noticeIdle);
   const [sample, setSample] = useState(false);
   const [chosen, setChosen] = useState<string | null>(null);
-  const [keyDraft, setKeyDraft] = useState(() => readKey());
+  const [sttConfig, setSttConfig] = useState(() => readConfig());
+  const [keyDraft, setKeyDraft] = useState(() => readConfig().key);
   const [keyNotice, setKeyNotice] = useState("");
   const session = useRef<ListenSession | null>(null);
   const request = useRef<AbortController | null>(null);
@@ -249,6 +256,19 @@ export function ConversationAssist({
           <div className="listening-key-body">
             <p>{c.assist.keyHint}</p>
             <div className="listening-key-row">
+              <select
+                value={sttConfig.provider}
+                onChange={(event) => {
+                  const provider = event.target.value as ProviderId;
+                  setSttConfig({ provider, key: keyDraft });
+                  writeConfig({ provider, key: keyDraft });
+                  setKeyNotice(provider === "browser" ? c.assist.keyProviderBrowser : "");
+                }}
+              >
+                <option value="browser">{c.assist.keyProviderBrowser}</option>
+                <option value="siliconflow">{c.assist.keyProviderSf}</option>
+                <option value="assemblyai">{c.assist.keyProviderAai}</option>
+              </select>
               <input
                 type="password"
                 value={keyDraft}
@@ -265,7 +285,10 @@ export function ConversationAssist({
                     setKeyNotice(c.assist.keyInvalid);
                     return;
                   }
-                  writeKey(clean);
+                  const provider: ProviderId =
+                    sttConfig.provider === "browser" ? "siliconflow" : sttConfig.provider;
+                  writeConfig({ provider, key: clean });
+                  setSttConfig({ provider, key: clean });
                   setKeyDraft(clean);
                   setKeyNotice(clean ? c.assist.keySaved : c.assist.keyCleared);
                 }}
@@ -275,7 +298,8 @@ export function ConversationAssist({
               <button
                 className="text-button"
                 onClick={() => {
-                  writeKey("");
+                  writeConfig({ provider: "browser", key: "" });
+                  setSttConfig({ provider: "browser", key: "" });
                   setKeyDraft("");
                   setKeyNotice(c.assist.keyCleared);
                 }}

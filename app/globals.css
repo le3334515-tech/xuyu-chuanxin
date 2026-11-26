@@ -3330,3 +3330,18 @@ html[lang^="zh"] .studio-content .workspace-intro h1 {
 .listening-key-notice:empty {
   margin: 0;
 }
+
+/* 语音服务选择行 */
+.listening-key-row select {
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12.5px;
+  outline: none;
+}
+.listening-key-row select:focus {
+  border-color: var(--signal);
+  box-shadow: 0 0 0 3px rgba(104, 70, 220, 0.12);
+}

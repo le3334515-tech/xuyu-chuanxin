@@ -274,6 +274,9 @@ type Copy = {
     keySaved: string;
     keyCleared: string;
     keyInvalid: string;
+    keyProviderBrowser: string;
+    keyProviderSf: string;
+    keyProviderAai: string;
     noticeIdle: string;
     noticeCancel: string;
     noticeThinking: string;
@@ -548,7 +551,10 @@ export const COPY: Record<Lang, Copy> = {
       keyClear: "清除",
       keySaved: "已保存，下次点「听一个问题」就走云端转写。",
       keyCleared: "已清除，回到浏览器自带识别。",
-      keyInvalid: "key 看起来不对（AssemblyAI 的 key 通常 32 位字符）。",
+      keyInvalid: "key 看起来不对（至少 20 个字符）。",
+      keyProviderBrowser: "浏览器自带（免费）",
+      keyProviderSf: "硅基流动 · 国内可充值",
+      keyProviderAai: "AssemblyAI · 海外",
       noticeIdle: "对方问了一句。接下来由你决定。",
       noticeCancel: "已停止听音。说什么是你的事。",
       noticeThinking: "已停止听音。正在准备几种说法…",
@@ -838,7 +844,10 @@ export const COPY: Record<Lang, Copy> = {
       keyClear: "Clear",
       keySaved: "Saved. The next Listen uses cloud transcription.",
       keyCleared: "Cleared. Back to the browser's own recognition.",
-      keyInvalid: "That doesn't look like an AssemblyAI key (usually 32 characters).",
+      keyInvalid: "That key looks too short (at least 20 characters).",
+      keyProviderBrowser: "Browser built-in (free)",
+      keyProviderSf: "SiliconFlow · China",
+      keyProviderAai: "AssemblyAI · global",
       noticeIdle: "A question comes in. You choose what comes next.",
       noticeCancel: "Listening is off. Your words stay in your control.",
       noticeThinking: "Listening is off. Preparing a few possible replies…",

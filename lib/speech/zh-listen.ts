@@ -8,7 +8,7 @@
  * B 路（填了 key）：AssemblyAI 多语言流式转写，中文可靠，见 cloud-listen.ts。
  */
 
-import { CloudListenSession, hasKey } from "@/lib/speech/cloud-listen";
+import { CloudTranscribeSession, readConfig } from "@/lib/speech/cloud-transcribe";
 
 export type ListenEvents = {
   onReady: () => void;
@@ -66,7 +66,7 @@ function networkHint(lang: "zh" | "en"): string {
 }
 
 export class SpeechListenSession {
-  private cloud: CloudListenSession | null = null;
+  private cloud: CloudTranscribeSession | null = null;
   private recognition: RecognitionLike | null = null;
   private closed = false;
   private lang: "zh" | "en" = "zh";
@@ -97,12 +97,13 @@ export class SpeechListenSession {
       return;
     }
 
-    // B 路：填了 key 就走云端流式转写（中文可靠）
-    if (hasKey()) {
-      const cloud = new CloudListenSession(this.events);
+    // B 路：选了云端服务并填了 key → 录音 + 上传转写（中文可靠）
+    const config = readConfig();
+    if (config.provider !== "browser" && config.key) {
+      const cloud = new CloudTranscribeSession(this.events, config);
       cloud.setLanguage(this.lang);
       this.cloud = cloud;
-      await cloud.start(false);
+      await cloud.start();
       return;
     }
 
@@ -267,4 +268,4 @@ export class SpeechListenSession {
   }
 }
 
-export { hasKey, readKey, writeKey } from "@/lib/speech/cloud-listen";
+export { PROVIDERS, readConfig, writeConfig, type ProviderId, type StoredConfig } from "@/lib/speech/cloud-transcribe";
