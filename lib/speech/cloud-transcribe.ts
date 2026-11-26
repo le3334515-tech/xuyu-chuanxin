@@ -209,7 +209,7 @@ export class CloudTranscribeSession {
       if (this.config.provider === "assemblyai") {
         void fetch("https://api.assemblyai.com/v2/upload", { method: "OPTIONS" }).catch(() => {});
       } else {
-        void fetch("https://api.siliconflow.cn/v1/models", { method: "GET" }).catch(() => {});
+        void fetch("https://api.siliconflow.cn/v1/audio/transcriptions", { method: "OPTIONS" }).catch(() => {});
       }
 
       const context = new AudioContext({ sampleRate: 16000 });
@@ -377,19 +377,59 @@ export class CloudTranscribeSession {
   }
 
   /** 硅基流动超时就换 AssemblyAI，别让用户干等 */
-  private static readonly SF_TIMEOUT_MS = 7000;
+  /** 国内链路通常 1 秒内返回；给慢网络留余量，但别让人干等 */
+  private static readonly SF_TIMEOUT_MS = 10_000;
+  private static readonly SLOW_KEY = "xuyu.stt.slow";
+  private static readonly SLOW_TTL_MS = 30 * 60 * 1000;
+
+  /** 上次硅基流动超时过就记住，30 分钟内直接用备用线，不再干等 */
+  private static siliconflowKnownSlow(): boolean {
+    try {
+      const raw = localStorage.getItem(CloudTranscribeSession.SLOW_KEY);
+      if (!raw) return false;
+      const at = Number(raw);
+      return Number.isFinite(at) && Date.now() - at < CloudTranscribeSession.SLOW_TTL_MS;
+    } catch {
+      return false;
+    }
+  }
+
+  private static rememberSlow(): void {
+    try {
+      localStorage.setItem(CloudTranscribeSession.SLOW_KEY, String(Date.now()));
+    } catch {
+      /* noop */
+    }
+  }
+
+  private static forgetSlow(): void {
+    try {
+      localStorage.removeItem(CloudTranscribeSession.SLOW_KEY);
+    } catch {
+      /* noop */
+    }
+  }
 
   private async transcribe(wav: Blob) {
     if (this.config.provider === "assemblyai") {
       await this.transcribeAssemblyAI(wav);
       return;
     }
+
+    // 已知这条线路慢：直接用备用，省掉十秒等待
+    const fallbackKey = assemblyaiKey();
+    if (fallbackKey && CloudTranscribeSession.siliconflowKnownSlow()) {
+      this.config = { provider: "assemblyai", key: fallbackKey };
+      await this.transcribeAssemblyAI(wav);
+      return;
+    }
+
     const result = await this.trySiliconFlow(wav);
     if (result === "ok" || this.closed) return;
     // 国内链路抽风时（实测偶尔 30 秒不返回），自动用备用凭据再试一次
-    const fallback = assemblyaiKey();
-    if (result === "slow" && fallback) {
-      this.config = { provider: "assemblyai", key: fallback };
+    if (result === "slow" && fallbackKey) {
+      CloudTranscribeSession.rememberSlow();
+      this.config = { provider: "assemblyai", key: fallbackKey };
       this.events.onTranscript(
         this.lang === "en" ? "Switching to backup…" : "换条线路，稍等…",
       );
@@ -440,6 +480,7 @@ export class CloudTranscribeSession {
         );
         return "failed";
       }
+      CloudTranscribeSession.forgetSlow();
       this.close();
       this.events.onQuestion(transcript.slice(0, 700));
       return "ok";
