@@ -1,6 +1,6 @@
 /**
  * 双语文案表。
- * zh 为中文改写，en 保持原版 SecondVoice 的原文措辞 —— 切到英文即回到原作观感。
+ * zh 为中文，en 为英文；两套措辞各自成立。
  */
 
 export type Lang = "zh" | "en";
@@ -305,7 +305,7 @@ export const COPY: Record<Lang, Copy> = {
     nav: {
       experience: "示例体验",
       madeForYou: "为谁而做",
-      source: "原作源码",
+      source: "我们的仓库",
       about: "关于续语传心",
       startSpeaking: "开始说话",
       skipToExperience: "跳到示例体验",
@@ -316,7 +316,7 @@ export const COPY: Record<Lang, Copy> = {
       switchToEn: "Switch to English",
     },
     home: {
-      award: "基于 AssemblyAI Hack into Speech 获奖作品改编",
+      award: "写下来，就能被听见",
       heroLine1: "为你说不出口的",
       heroLine2: "那一句话。",
       heroP1: "先找到词，再让它替你说出来。",
@@ -326,7 +326,7 @@ export const COPY: Record<Lang, Copy> = {
       principle: "说话跟着",
       principleStrong: "你的节奏走。",
       poweredBy: "在这台设备上发声",
-      adaptedFrom: "原型来自 Tarang Goyal",
+      adaptedFrom: "续语传心出品",
       editorialEyebrow: "每个字后面，都有一个人",
       editorialH2a: "对话不是台词。",
       editorialH2b: "你可以改你的那句。",
@@ -373,7 +373,7 @@ export const COPY: Record<Lang, Copy> = {
       closingH2b: "只有你能说。",
       closingCta: "找到你的说法",
       footerNote: "为正在说话的那个人而做。",
-      footerCode: "看看原版代码",
+      footerCode: "查看源码",
     },
     demo: {
       eyebrow: "一句话，始终是你的",
@@ -589,12 +589,12 @@ export const COPY: Record<Lang, Copy> = {
   },
 
   en: {
-    brand: { name: "SecondVoice", home: "SecondVoice home" },
+    brand: { name: "Xuyu", home: "Xuyu home" },
     nav: {
       experience: "Experience",
       madeForYou: "Made for you",
       source: "Source code",
-      about: "About SecondVoice",
+      about: "About Xuyu",
       startSpeaking: "Start speaking",
       skipToExperience: "Skip to the recorded experience",
       skipToMessage: "Skip to your message",
@@ -604,7 +604,7 @@ export const COPY: Record<Lang, Copy> = {
       switchToEn: "Switch to English",
     },
     home: {
-      award: "Adapted from the AssemblyAI Hack into Speech winner",
+      award: "Write it, and it will be heard",
       heroLine1: "A voice for",
       heroLine2: "what you mean.",
       heroP1: "Find the words. Speak them aloud.",
@@ -614,7 +614,7 @@ export const COPY: Record<Lang, Copy> = {
       principle: "Speech that follows",
       principleStrong: "your lead.",
       poweredBy: "Powered by this device",
-      adaptedFrom: "Original by Tarang Goyal",
+      adaptedFrom: "By the Xuyu team",
       editorialEyebrow: "THERE’S A PERSON BEHIND EVERY WORD",
       editorialH2a: "Conversations aren’t scripts.",
       editorialH2b: "You can change yours.",
@@ -662,7 +662,7 @@ export const COPY: Record<Lang, Copy> = {
       closingH2b: "only you can say.",
       closingCta: "Find your words",
       footerNote: "Made for the person speaking.",
-      footerCode: "Explore the original code",
+      footerCode: "View source",
     },
     demo: {
       eyebrow: "ONE THOUGHT. ALWAYS YOURS.",
@@ -793,7 +793,7 @@ export const COPY: Record<Lang, Copy> = {
       footer: "A pause. Still your turn.",
       dialogEyebrow: "A MESSAGE FOR YOU",
       backToWriting: "Back to writing",
-      dialogFooter: "SecondVoice",
+      dialogFooter: "续语传心",
       textOnly: "Text only · no audio is playing",
       useMessage: (text) => `Use message: ${text}`,
       noticeIdle: "Write a thought, or choose a phrase to make your own.",

@@ -1,4 +1,4 @@
-# 续语传心 · SecondVoice
+# 续语传心 · Xuyu
 
 **写下一句话，让它替你说出来。念的时候可以继续改，随时打断，随时重说。**
 
@@ -6,47 +6,53 @@
 
 中英双语，右上角一键切换。纯前端、无后端、无密钥 —— 文字不出你的设备。
 
-## 从哪来的
+## 它解决什么
 
-结构、交互与视觉来自 [taranggoyal70/secondvoice](https://github.com/taranggoyal70/secondvoice)（MIT，AssemblyAI *Hack into Speech* 获奖作品）。那份作品只支持英文，发声走 AssemblyAI 的云端 TTS。
+有一类时刻，说话比写字难：要争取时间、要纠正一句被误解的话、要把已经出口的半句收回来。
 
-这一版把它做成中文可用：
+续语传心把这件事拆成三个动作 —— **写、说、改**：
 
-| | 原版 | 续语传心 |
-|---|---|---|
-| 界面语言 | English | 中文 / English 可切换 |
-| 发声 | AssemblyAI 流式 TTS（需 API key） | 本机语音合成（免密钥） |
-| 逐词高亮 | 服务端返回词边界 | 中文分词 + 朗读边界重算 |
-| 听一个问题 | AssemblyAI 流式转写 | 浏览器语音识别 |
-| 回复建议 | AI 网关生成 | 本地按问句类型生成三句 |
-| 部署 | Vercel（服务端） | 纯静态导出，任意托管 |
-| 示例录音 | 英文预录 | 中英各一套预录（含词时间轴） |
+- **写**：纸上的草稿是你的，不是被念出去的那一版。
+- **说**：文字按你选的音色念出来，逐词高亮，念到哪儿看得见。
+- **改**：念到一半按停止，这一版会被完整保留；把句子放回纸上改完再念，改动逐词标出增删。
 
-**为什么换掉发声引擎**：实测原版接入的 AssemblyAI TTS，`language` 支持集是
-`english / french / german / italian / portuguese / spanish` —— 不含中文；
-用 `english` 强行念中文时整句只回一个词边界，逐词高亮随之失效。
-所以中文侧改用设备自带音色，并用分词把边界补回来。
+**草稿和「已经交给声音的那一版」是两件事。** 你可以在它念的时候继续改下一句，而正在念的那句不受影响。
 
-## 与原版一致的部分（逐项核对过）
+## 功能
 
-**结构与排版**沿用原版 DOM 与类名，没有重画：
+**写和念**
+- 草稿写作，中文按字计、英文按词计，上限 1800 字
+- 系统音色朗读，逐词高亮跟着播放走
+- **停止是真取消** —— 取消语音队列并作废回调，不是改个标签
+- **修订保留上一版** —— 词级比对，标出改了哪几处、几处，可反复迭代
+- 显示给他看：大字弹窗，只给对方读，不出声
+- 试听音色不占用、不改草稿
+- 起手句 4 句 + 自己的短语库（12 条上限，存本机）
+- 对话记录区分「已念完 / 被打断」，打断的会记下念到哪
+- 大字、高对比两套无障碍模式
+- 快捷键：`⌘/Ctrl+↵` 念出来 · `Esc` 停止
 
-- `demo-top` / `choreography-toolbar` / `chapter-switch` / `choreography-stage` / `choreography-actions`
-- 工作室：`01 写下来` + `02 播放` 双栏，`panel-index`、`editor-card`、`output-card`、`phrase-section`、`saved-section`、`history-section`、`session-details`
-- 顶栏：文字大小 / 对比度 / 关于；移动端 `mobile-playback` 固定条；`listener-dialog` 大字弹窗
+**听**
+- 点一下说一句，说完停 1 秒自动结束
+- 云端转写中文出汉字，2~5 秒出结果
+- 16 根波形条跟着**真实麦克风音量**跳，能看出它在收音
+- 转写完自动给三条可说的回复，点任一可「念出来」或「改一改」
+- 也可以按意思重写：「想改到周末」→ 三句成句的说法
+- 识别不顺利时自动展开手打入口，打字同样能拿建议
+- 示例问题：不占麦克风验证整条链路
 
-**行为**逐条对齐：
+**首页**
+- 示例录音三章节：念出来 → 打断 → 修订
+- 四种视觉动效：环绕 / 绸带 / 绽放 / 静止
+- 中英一键切换，英文侧文案独立成套
 
-1. 草稿（draft）与正在念的那一版（utterance）是两件事：念的时候可以继续写下一句
-2. **Stop 是真取消** —— 取消语音队列并作废回调，不是改个标签
-3. **Revise 保留上一版** —— 词级 LCS 比对，`ins` / `del` 着色 + 增删计数
-4. 记录里区分「已念完 / 被打断」，打断的会记下念到哪儿
-5. 短语库：12 条上限、去重、只存本机
-6. 试听不改动草稿；离线时按钮降级但文字仍可显示
-7. `⌘/Ctrl + ↵` 念出来 · `Esc` 停止 · 页面隐藏即暂停
-8. 示例录音三章节：念出来 → 打断 → 修订，可切四种视觉动效
-9. 听一个问题 → 三条可选回复 → Speak / Edit，`Give me a moment` 直接念一句
-10. 高对比与大字两套可访问性模式
+## 语音识别的三条路
+
+1. **云端转写（默认）** —— 内置凭据，打开就能用，不用配置，中文出汉字
+2. **失败自动回退** —— 云端连不上会切到设备自带识别，并提示「请再说一次」
+3. **高级设置（可选）** —— 自己换硅基流动（国内可充值）或其他兼容 OpenAI 风格的转写服务
+
+环境不对会直接给出可操作提示：微信/QQ 内置浏览器、非 HTTPS、缺录音能力、麦克风被拒、没听到声音。
 
 ## 本地跑
 
@@ -66,22 +72,24 @@ NEXT_PUBLIC_BASE_PATH=/xuyu-chuanxin npm run build
 ## 目录
 
 ```
-app/                        页面与元数据（静态导出）
+app/                    页面与元数据（全静态导出）
 components/
-  second-voice-studio.tsx   工作室：写、念、停、修订、记录
-  conversation-assist.tsx   听一个问题 → 三条回复
-  recorded-demo.tsx         首页示例录音三章节
-  speech-scene.tsx          文字 → 声音的舞台（逐词飞入、修订高亮）
-  voice-sculpture.tsx       环绕 / 绸带 / 绽放 / 静止
-  lang-provider.tsx         中英切换
+  xuyu-studio.tsx       工作室：写、念、停、修订、记录
+  conversation-assist.tsx  听一个问题 → 三条回复
+  recorded-demo.tsx     首页示例录音三章节
+  speech-scene.tsx      文字 → 声音的舞台（逐词飞入、修订高亮）
+  voice-sculpture.tsx   环绕 / 绸带 / 绽放 / 静止
+  lang-provider.tsx     中英切换
 lib/
-  i18n.ts                   双语文案表（英文侧沿用原版原文）
-  speech/zh-tts.ts          本机发声会话（与原版 TTS 同契约）
-  speech/zh-listen.ts       本机听音会话（与原版 STT 同契约）
-  speech/zh-replies.ts      本地回复建议
-  text-zh.ts                中文分词（标点并入前词，高亮不停在标点上）
-  speech-motion.ts          修订比对与逐词飞入
-public/demo/                示例录音 + 词时间轴（中英各一套）
+  i18n.ts               双语文案表
+  speech/zh-tts.ts      本机发声会话
+  speech/cloud-transcribe.ts  录音上传式转写（多服务商）
+  speech/zh-listen.ts   听音路由（云端 / 浏览器自带 / 自动回退）
+  speech/zh-replies.ts  本地回复建议
+  speech/env-check.ts   环境自检
+  text-zh.ts            中文分词（标点并入前词，高亮不停在标点上）
+  speech-motion.ts      修订比对与逐词飞入
+public/demo/            示例录音 + 词时间轴（中英各一套）
 ```
 
 ## 已知限制
@@ -89,8 +97,8 @@ public/demo/                示例录音 + 词时间轴（中英各一套）
 - 音色来自设备：Windows 上是 Microsoft Huihui / Yaoyao 等，音质取决于系统
 - 没有可用中文音色的环境（部分 Linux）能看、能记，但念不出声
 - Safari / Firefox 的朗读边界不稳定，会退化成按节拍推进
-- 语音识别需要 Chrome / Edge；不接受授权时仍可手打问题
+- 语音识别需要 HTTPS 与麦克风授权；微信内置浏览器不放行麦克风
 
 ## 许可
 
-MIT。产品概念与交互结构来自 [Tarang Goyal 的 SecondVoice](https://github.com/taranggoyal70/secondvoice)（MIT），中文版实现与文案为本仓库改写。
+MIT

@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { SecondVoiceStudio } from "@/components/second-voice-studio";
+import { XuyuStudio } from "@/components/xuyu-studio";
 import { useLang } from "@/components/lang-provider";
 
 export function SpeakClient() {
@@ -12,5 +12,5 @@ export function SpeakClient() {
   const order = ["more-time", "ask-me", "try-again", "continue"];
   const index = order.indexOf(starter ?? "");
   const initialMessage = index >= 0 ? copy.starters[index] : "";
-  return <SecondVoiceStudio initialMessage={initialMessage} />;
+  return <XuyuStudio initialMessage={initialMessage} />;
 }

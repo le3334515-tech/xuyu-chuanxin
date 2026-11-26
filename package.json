@@ -1,5 +1,5 @@
 {
-  "name": "xuyu-chuanxin",
+  "name": "xuyu",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -26,5 +26,6 @@
     "eslint": "^9.39.0",
     "eslint-config-next": "^16.0.0",
     "typescript": "^5.9.3"
-  }
+  },
+  "description": "续语传心 · 写下一句话，让它替你说出来。中英双语辅助沟通，纯前端。"
 }

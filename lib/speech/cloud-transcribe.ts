@@ -73,7 +73,7 @@ registerProcessor("pcm-recorder", PCMRecorder);
 const CONFIG_KEY = "xuyu.stt.config";
 const MAX_RECORD_MS = 15_000;
 /** 连续静音多久判定说完 */
-const SILENCE_HOLD_MS = 900;
+const SILENCE_HOLD_MS = 620;
 /** 一直没人说话就早点收工，别让人干等 30 秒 */
 const NO_SPEECH_LIMIT_MS = 6_000;
 /** 音量阈值（RMS） */
@@ -171,6 +171,9 @@ export class CloudTranscribeSession {
   private recorder: AudioWorkletNode | null = null;
   private analyser: AnalyserNode | null = null;
   private monitor: ReturnType<typeof setInterval> | null = null;
+  private mediaRecorder: MediaRecorder | null = null;
+  private mediaChunks: Blob[] = [];
+  private mediaType = "";
   private chunks: Int16Array[] = [];
   private sampleRate = 16000;
   private startedAt = 0;
@@ -198,6 +201,13 @@ export class CloudTranscribeSession {
       }
       this.stream = stream;
 
+      // 录音期间并行预热 TLS 连接：跨境链路握手就要几百毫秒，别等最后才建
+      if (this.config.provider === "assemblyai") {
+        void fetch("https://api.assemblyai.com/v2/upload", { method: "OPTIONS" }).catch(() => {});
+      } else {
+        void fetch("https://api.siliconflow.cn/v1/models", { method: "GET" }).catch(() => {});
+      }
+
       const context = new AudioContext({ sampleRate: 16000 });
       this.context = context;
       await context.resume();
@@ -218,6 +228,28 @@ export class CloudTranscribeSession {
       const source = context.createMediaStreamSource(stream);
       const recorder = new AudioWorkletNode(context, "pcm-recorder");
       const analyser = context.createAnalyser();
+
+      // 小体积通道：webm/opus 约为 WAV 的 6%，上传快一个数量级
+      try {
+        const dest = context.createMediaStreamDestination();
+        source.connect(dest);
+        const mime = ["audio/webm;codecs=opus", "audio/webm", "audio/ogg;codecs=opus"]
+          .find((type) => MediaRecorder.isTypeSupported?.(type));
+        if (mime) {
+          this.mediaType = mime;
+          this.mediaChunks = [];
+          this.mediaRecorder = new MediaRecorder(dest.stream, {
+            mimeType: mime,
+            audioBitsPerSecond: 16000,
+          });
+          this.mediaRecorder.ondataavailable = (event) => {
+            if (event.data.size > 0) this.mediaChunks.push(event.data);
+          };
+          this.mediaRecorder.start();
+        }
+      } catch {
+        /* 不支持就退回 WAV */
+      }
       analyser.fftSize = 1024;
       this.source = source;
       this.recorder = recorder;
@@ -293,6 +325,7 @@ export class CloudTranscribeSession {
   async finish() {
     if (this.closed) return;
     const chunks = this.chunks;
+    const small = await this.collectSmallAudio();
     const totalSamples = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
     // 太短（<0.4 秒）说明没有有效语音，不必花额度
     if (totalSamples < this.sampleRate * 0.4) {
@@ -313,9 +346,30 @@ export class CloudTranscribeSession {
       );
       return;
     }
-    const wav = encodeWav(chunks, this.sampleRate);
+    // 有 webm 就用 webm（体积小、上传快），否则退回 WAV
+    const audio = small ?? encodeWav(chunks, this.sampleRate);
     this.events.onTranscript(this.lang === "en" ? "Transcribing…" : "正在转写…");
-    await this.transcribe(wav);
+    await this.transcribe(audio);
+  }
+
+  /** 收尾 MediaRecorder，拿到 webm/opus 音频 */
+  private collectSmallAudio(): Promise<Blob | null> {
+    const recorder = this.mediaRecorder;
+    if (!recorder || recorder.state === "inactive") return Promise.resolve(null);
+    return new Promise((resolve) => {
+      const timer = setTimeout(() => resolve(null), 800);
+      recorder.onstop = () => {
+        clearTimeout(timer);
+        const blob = new Blob(this.mediaChunks, { type: this.mediaType || "audio/webm" });
+        resolve(blob.size > 0 ? blob : null);
+      };
+      try {
+        recorder.stop();
+      } catch {
+        clearTimeout(timer);
+        resolve(null);
+      }
+    });
   }
 
   private async transcribe(wav: Blob) {
@@ -326,7 +380,8 @@ export class CloudTranscribeSession {
     const provider = PROVIDERS.siliconflow;
     try {
       const form = new FormData();
-      form.append("file", wav, "question.wav");
+      const isWebm = (wav.type || "").includes("webm") || (wav.type || "").includes("ogg");
+      form.append("file", wav, isWebm ? "question.webm" : "question.wav");
       form.append("model", provider.model);
 
       const response = await fetch(`${provider.base}/v1/audio/transcriptions`, {
@@ -384,6 +439,14 @@ export class CloudTranscribeSession {
   private stopCapture() {
     if (this.monitor) clearInterval(this.monitor);
     this.monitor = null;
+    if (this.mediaRecorder && this.mediaRecorder.state !== "inactive") {
+      try {
+        this.mediaRecorder.stop();
+      } catch {
+        /* noop */
+      }
+    }
+    this.mediaRecorder = null;
     this.source?.disconnect();
     if (this.recorder) {
       this.recorder.port.onmessage = null;
@@ -458,9 +521,10 @@ export class CloudTranscribeSession {
         return;
       }
 
-      for (let attempt = 0; attempt < 60; attempt += 1) {
+      for (let attempt = 0; attempt < 80; attempt += 1) {
         if (this.closed) return;
-        await new Promise((resolve) => setTimeout(resolve, 600));
+        // 第一次立刻问，之后 300ms 一次：转写通常 1~2 秒就绪
+        if (attempt > 0) await new Promise((resolve) => setTimeout(resolve, 300));
         const poll = await fetch(`https://api.assemblyai.com/v2/transcript/${job.id}`, {
           headers: { authorization: key },
           signal: AbortSignal.timeout(15_000),

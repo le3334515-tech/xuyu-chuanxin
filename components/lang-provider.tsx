@@ -14,8 +14,8 @@ import { COPY, LANGS, SPEECH_TAG, type Lang } from "@/lib/i18n";
 const STORAGE_KEY = "xuyu.lang";
 
 const TITLES: Record<string, { zh: string; en: string }> = {
-  home: { zh: "续语传心 — 为你说不出口的那句话", en: "SecondVoice — A voice for what you mean" },
-  speak: { zh: "你的话 — 续语传心", en: "Your words — SecondVoice" },
+  home: { zh: "续语传心 — 为你说不出口的那句话", en: "Xuyu — A voice for what you mean" },
+  speak: { zh: "你的话 — 续语传心", en: "Your words — Xuyu" },
 };
 
 function pageKey(): keyof typeof TITLES {

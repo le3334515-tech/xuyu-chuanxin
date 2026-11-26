@@ -76,7 +76,7 @@ const subscribeNetwork = (callback: () => void) => {
   };
 };
 
-export function SecondVoiceStudio({
+export function XuyuStudio({
   initialMessage = "",
 }: {
   initialMessage?: string;
@@ -134,7 +134,7 @@ export function SecondVoiceStudio({
   const wordCount = useMemo(() => {
     const trimmed = text.trim();
     if (!trimmed) return 0;
-    // 中文按字计，英文按词计 —— 与原版「word count」在各自语言下的直觉一致
+    // 中文按字计，英文按词计
     return lang === "en" ? trimmed.split(/\s+/).length : [...trimmed.replace(/\s+/g, "")].length;
   }, [text, lang]);
   const hasText = Boolean(text.trim());
@@ -394,7 +394,7 @@ export function SecondVoiceStudio({
     <main
       className={`studio-shell ${contrast ? "high-contrast" : ""} ${largeType ? "large-type" : ""}`}
     >
-      <PageTitle zh="你的话 — 续语传心" en="Your words — SecondVoice" />
+      <PageTitle zh="你的话 — 续语传心" en="Your words — Xuyu" />
       <audio ref={previewAudio} preload="none" />
       <a href="#message" className="skip-link">
         {c.nav.skipToMessage}

@@ -24,7 +24,7 @@ export function HomeContent() {
     <main className="landing">
       <PageTitle
         zh="续语传心 — 为你说不出口的那句话"
-        en="SecondVoice — A voice for what you mean"
+        en="Xuyu — A voice for what you mean"
       />
       <a href="#experience" className="skip-link">
         {c.nav.skipToExperience}
@@ -34,7 +34,7 @@ export function HomeContent() {
         <nav aria-label={c.nav.mainNav}>
           <a href="#experience">{c.nav.experience}</a>
           <a href="#how-it-works">{c.nav.madeForYou}</a>
-          <a href="https://github.com/taranggoyal70/secondvoice">
+          <a href="https://github.com/le3334515-tech/xuyu-chuanxin">
             {c.nav.source} <ArrowUpRight size={14} />
           </a>
         </nav>
@@ -260,12 +260,8 @@ export function HomeContent() {
       </section>
       <footer className="site-footer">
         <Brand />
-        <span>
-          {c.home.adaptedFrom.replace("Tarang Goyal", "")}{" "}
-          <a href="https://github.com/taranggoyal70/secondvoice">SecondVoice</a>
-          （Tarang Goyal）· {c.home.footerNote}
-        </span>
-        <a href="https://github.com/taranggoyal70/secondvoice">
+        <span>{c.home.adaptedFrom} · {c.home.footerNote}</span>
+        <a href="https://github.com/le3334515-tech/xuyu-chuanxin">
           {c.home.footerCode} <ArrowUpRight size={16} />
         </a>
       </footer>

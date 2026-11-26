@@ -3216,7 +3216,7 @@ select {
 
 /* ══════════════════════════════════════════════════════════
    中文排版修正
-   原版的负字距与超大字号是为拉丁字母调的；
+   超大字号与负字距适合拉丁字母；
    中文方块字在大字号 + 负字距下会挤成一团，这里按语言分治。
    ══════════════════════════════════════════════════════════ */
 html[lang^="zh"] .hero h1 {
@@ -3372,4 +3372,14 @@ html[lang^="zh"] .studio-content .workspace-intro h1 {
 }
 .listening-bars {
   align-items: flex-end;
+}
+
+/* 转写等待时给一条进度提示，降低「卡住了」的错觉 */
+.listening-engine[data-busy="1"]::before {
+  background: #d99a2b;
+  animation: engine-pulse 1s ease-in-out infinite;
+}
+@keyframes engine-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
 }

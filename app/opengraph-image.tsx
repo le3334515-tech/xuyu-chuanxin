@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 export const dynamic = "force-static";
 export const alt =
-  "续语传心 — 为你说不出口的那句话。中文辅助沟通原型。";
+  "续语传心 — 为你说不出口的那句话。";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export default function Image() {
@@ -25,9 +25,8 @@ export default function Image() {
           fontSize: 26,
         }}
       >
-        <span>SecondVoice.</span>
+        <span>续语传心</span>
         <span style={{ fontSize: 15, color: "#625d70" }}>
-          AssemblyAI Hack into Speech · Winner
         </span>
       </div>
       <div
@@ -82,7 +81,7 @@ export default function Image() {
         }}
       >
         <span>你的话。你的节奏。你的下一句。</span>
-        <span>改编自 Tarang Goyal 的 SecondVoice</span>
+        <span>写下来，就能被听见</span>
       </div>
     </div>,
     size,
