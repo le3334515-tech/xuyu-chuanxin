@@ -86,13 +86,17 @@ export type StoredConfig = {
 
 const BUILTIN: StoredConfig = { provider: BUILTIN_PROVIDER, key: builtinKey() };
 
+/**
+ * 存储里只认「用户亲自保存过」的配置（带 source: "user"）。
+ * 旧版本留下的、或写入中途失败的空壳配置一律忽略 ——
+ * 否则脏数据会盖掉内置凭据，表现就是「key 没通过」。
+ */
 export function readConfig(): StoredConfig {
   try {
     const raw = localStorage.getItem(CONFIG_KEY);
     if (raw) {
-      const data = JSON.parse(raw) as StoredConfig;
-      if (data && typeof data.key === "string") {
-        // 用户显式选过就听用户的
+      const data = JSON.parse(raw) as StoredConfig & { source?: string };
+      if (data && data.source === "user") {
         if (data.provider === "browser") return { provider: "browser", key: "" };
         if (data.key) return { provider: data.provider, key: data.key };
       }
@@ -111,9 +115,21 @@ export function isBuiltinReady(): boolean {
 
 export function writeConfig(next: StoredConfig): void {
   try {
-    localStorage.setItem(CONFIG_KEY, JSON.stringify(next));
+    localStorage.setItem(CONFIG_KEY, JSON.stringify({ ...next, source: "user" }));
   } catch {
     /* 忽略写入失败 */
+  }
+}
+
+/** 一次性清掉旧版本留下的脏配置 */
+export function clearLegacyConfig(): void {
+  try {
+    const raw = localStorage.getItem(CONFIG_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw) as { source?: string };
+    if (data?.source !== "user") localStorage.removeItem(CONFIG_KEY);
+  } catch {
+    /* noop */
   }
 }
 
@@ -400,8 +416,9 @@ export class CloudTranscribeSession {
         signal: AbortSignal.timeout(45_000),
       });
       if (!upload.ok) {
+        const body = await upload.text().catch(() => "");
         this.close();
-        this.events.onError(this.refused(upload.status));
+        this.events.onError(this.refused(upload.status, body));
         return;
       }
       const uploaded = (await upload.json()) as { upload_url?: string };
@@ -427,8 +444,9 @@ export class CloudTranscribeSession {
         signal: AbortSignal.timeout(20_000),
       });
       if (!create.ok) {
+        const body = await create.text().catch(() => "");
         this.close();
-        this.events.onError(this.refused(create.status));
+        this.events.onError(this.refused(create.status, body));
         return;
       }
       const job = (await create.json()) as { id?: string };
@@ -497,11 +515,12 @@ export class CloudTranscribeSession {
     }
   }
 
-  private refused(status: number): string {
+  private refused(status: number, detail = ""): string {
+    const extra = detail ? `：${detail.slice(0, 90)}` : "";
     if (status === 401 || status === 403) {
       return this.lang === "en"
-        ? "The speech key was rejected. Check it and try again."
-        : "语音服务的 key 没通过。检查一下再试。";
+        ? `The speech key was rejected (HTTP ${status}${detail ? ": " + detail.slice(0, 80) : ""}).`
+        : `语音服务的 key 没通过（HTTP ${status}${extra}）。`;
     }
     if (status === 429) {
       return this.lang === "en"
@@ -509,7 +528,7 @@ export class CloudTranscribeSession {
         : "语音服务暂时限流了，稍等再试。";
     }
     return this.lang === "en"
-      ? `The speech service refused the request (HTTP ${status}).`
-      : `语音服务拒绝了这次请求（HTTP ${status}）。`;
+      ? `The speech service refused the request (HTTP ${status}${detail ? ": " + detail.slice(0, 80) : ""}).`
+      : `语音服务拒绝了这次请求（HTTP ${status}${extra}）。`;
   }
 }

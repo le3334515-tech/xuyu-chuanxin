@@ -22,6 +22,7 @@ import {
   SpeechListenSession as ListenSession,
   readConfig,
   writeConfig,
+  clearLegacyConfig,
   isBuiltinReady,
   type ProviderId,
 } from "@/lib/speech/zh-listen";
@@ -70,7 +71,11 @@ export function ConversationAssist({
   const [notice, setNotice] = useState(c.assist.noticeIdle);
   const [sample, setSample] = useState(false);
   const [chosen, setChosen] = useState<string | null>(null);
-  const [sttConfig, setSttConfig] = useState(() => readConfig());
+  const [sttConfig, setSttConfig] = useState(() => {
+    // 旧版本留下的脏配置会盖掉内置凭据，先清掉再读
+    clearLegacyConfig();
+    return readConfig();
+  });
   const [keyDraft, setKeyDraft] = useState(() => readConfig().key);
   const [keyNotice, setKeyNotice] = useState("");
   const [level, setLevel] = useState(0);

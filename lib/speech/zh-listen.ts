@@ -69,6 +69,7 @@ function networkHint(lang: "zh" | "en"): string {
 
 export class SpeechListenSession {
   private cloud: CloudTranscribeSession | null = null;
+  private fellBack = false;
   private recognition: RecognitionLike | null = null;
   private closed = false;
   private lang: "zh" | "en" = "zh";
@@ -109,14 +110,42 @@ export class SpeechListenSession {
     // B 路：默认就用内置凭据做录音 + 上传转写（中文可靠，开箱可用）
     const config = readConfig();
     if (config.provider !== "browser" && config.key) {
-      const cloud = new CloudTranscribeSession(this.events, config);
+      const cloud = new CloudTranscribeSession(
+        {
+          ...this.events,
+          onError: (message) => {
+            // 麦克风本身的问题回退也没用
+            if (/麦克风|microphone|没有听到|didn't hear/i.test(message)) {
+              this.events.onError(message);
+              return;
+            }
+            if (this.fellBack) {
+              this.events.onError(message);
+              return;
+            }
+            this.fellBack = true;
+            this.events.onTranscript(
+              this.lang === "en"
+                ? "Cloud unreachable — using the phone's own recognition, please speak again."
+                : "云端没连上，改用手机自带识别 —— 请再说一次。",
+            );
+            void this.startBrowserRecognition();
+          },
+        },
+        config,
+      );
       cloud.setLanguage(this.lang);
       this.cloud = cloud;
       await cloud.start();
       return;
     }
 
-    // A 路：浏览器识别
+    await this.startBrowserRecognition();
+  }
+
+  /** A 路：浏览器自带识别（免费；Edge 通常可用） */
+  private async startBrowserRecognition() {
+    if (this.closed) return;
     const recognition = recognitionFactory();
     if (!recognition) {
       this.events.onError(
@@ -281,6 +310,7 @@ export {
   PROVIDERS,
   readConfig,
   writeConfig,
+  clearLegacyConfig,
   isBuiltinReady,
   type ProviderId,
   type StoredConfig,
