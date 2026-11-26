@@ -130,12 +130,22 @@ export function RecordedDemo() {
     );
     player.currentTime = 0;
 
+    // 「打断」章节：播到第 6 个词就自动停下，演示被打断的样子
+    const cutoff = next === 1 ? (timedWords[5]?.end ?? 1500) : Infinity;
+
     const sync = () => {
       const now = player.currentTime * 1000;
       let reached = 0;
       for (let i = 0; i < timedWords.length; i += 1) {
-        if (timedWords[i].start <= now) reached = i + 1;
+        if (timedWords[i].start <= Math.min(now, cutoff)) reached = i + 1;
         else break;
+      }
+      if (now >= cutoff) {
+        cleanup();
+        setPhase("stopped");
+        setNotice(c.demo.noticeStopped);
+        setHeard(segmentIndexAt(segments, charOf[Math.min(reached, charOf.length) - 1] ?? 0) + 1);
+        return;
       }
       if (!reached) {
         setHeard(0);
