@@ -9,8 +9,6 @@
  * 所以纯静态站点可以直连，key 只存在本机。
  */
 
-import { asset } from "@/lib/asset";
-
 export type ListenEvents = {
   onReady: () => void;
   onTranscript: (text: string) => void;
@@ -43,6 +41,30 @@ export const PROVIDERS: Record<Exclude<ProviderId, "browser">, ProviderConfig> =
     hint: "海外服务，需要外币卡",
   },
 };
+
+const PCM_WORKLET_SOURCE = `
+class PCMRecorder extends AudioWorkletProcessor {
+  constructor() {
+    super();
+    this.buffer = new Int16Array(Math.round(sampleRate / 10));
+    this.offset = 0;
+  }
+  process(inputs) {
+    const channel = inputs[0] && inputs[0][0];
+    if (!channel) return true;
+    for (const value of channel) {
+      this.buffer[this.offset++] = Math.round(Math.max(-1, Math.min(1, value)) * (value < 0 ? 32768 : 32767));
+      if (this.offset === this.buffer.length) {
+        this.port.postMessage(this.buffer.buffer, [this.buffer.buffer]);
+        this.buffer = new Int16Array(Math.round(sampleRate / 10));
+        this.offset = 0;
+      }
+    }
+    return true;
+  }
+}
+registerProcessor("pcm-recorder", PCMRecorder);
+`;
 
 const CONFIG_KEY = "xuyu.stt.config";
 const MAX_RECORD_MS = 20_000;
@@ -155,7 +177,15 @@ export class CloudTranscribeSession {
       this.sampleRate = context.sampleRate;
       if (this.closed) return;
 
-      await context.audioWorklet.addModule(asset("/audio/pcm-worklet.js"));
+      // 用 Blob 内联 worklet：不依赖 public 下的文件，子路径部署也不会 404
+      const workletUrl = URL.createObjectURL(
+        new Blob([PCM_WORKLET_SOURCE], { type: "application/javascript" }),
+      );
+      try {
+        await context.audioWorklet.addModule(workletUrl);
+      } finally {
+        URL.revokeObjectURL(workletUrl);
+      }
       if (this.closed) return;
 
       const source = context.createMediaStreamSource(stream);
