@@ -16,6 +16,7 @@ export type ListenEvents = {
   onTranscript: (text: string) => void;
   onQuestion: (text: string) => void;
   onError: (message: string) => void;
+  onLevel?: (level: number) => void;
 };
 
 type RecognitionLike = {

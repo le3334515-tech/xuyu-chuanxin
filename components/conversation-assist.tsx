@@ -73,6 +73,7 @@ export function ConversationAssist({
   const [sttConfig, setSttConfig] = useState(() => readConfig());
   const [keyDraft, setKeyDraft] = useState(() => readConfig().key);
   const [keyNotice, setKeyNotice] = useState("");
+  const [level, setLevel] = useState(0);
   const session = useRef<ListenSession | null>(null);
   const request = useRef<AbortController | null>(null);
   const questionEditor = useRef<HTMLDetailsElement>(null);
@@ -152,6 +153,9 @@ export function ConversationAssist({
     setPhase("connecting");
     setNotice(recorded ? c.assist.noticeRecordedOpen : c.assist.noticeMicOpen);
     const next = new ListenSession({
+      onLevel: (value) => {
+        if (id === version.current) setLevel(value);
+      },
       onReady: () => {
         if (id !== version.current) return;
         setPhase("listening");
@@ -341,10 +345,22 @@ export function ConversationAssist({
             {question || (phase === "listening" ? c.assist.listening : c.assist.whatBack)}
           </p>
           {(phase === "listening" || phase === "thinking") && (
-            <div className="listening-bars" aria-hidden="true">
-              {Array.from({ length: 16 }, (_, i) => (
-                <i key={i} style={{ animationDelay: `${i * 0.07}s` }} />
-              ))}
+            <div className="listening-bars" aria-hidden="true" data-live={level > 0.02 ? "1" : "0"}>
+              {Array.from({ length: 16 }, (_, i) => {
+                // 真实电平：中间高两头低，跟着说话起伏
+                const shape = 1 - Math.abs(i - 7.5) / 9;
+                const height = 8 + level * 46 * shape;
+                return (
+                  <i
+                    key={i}
+                    style={{
+                      height: `${Math.max(8, height)}px`,
+                      animationDelay: `${i * 0.07}s`,
+                      opacity: level > 0.02 ? 1 : 0.45,
+                    }}
+                  />
+                );
+              })}
             </div>
           )}
           <details className="question-editor" ref={questionEditor}>

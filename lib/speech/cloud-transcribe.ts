@@ -16,6 +16,8 @@ export type ListenEvents = {
   onTranscript: (text: string) => void;
   onQuestion: (text: string) => void;
   onError: (message: string) => void;
+  /** 真实输入电平 0~1，用来让波形条跟着说话跳动 */
+  onLevel?: (level: number) => void;
 };
 
 export type ProviderId = "siliconflow" | "assemblyai" | "browser";
@@ -245,6 +247,7 @@ export class CloudTranscribeSession {
     }
     const rms = Math.sqrt(sum / data.length);
     const now = performance.now();
+    this.events.onLevel?.(Math.min(1, rms * 9));
 
     if (rms > SILENCE_RMS) {
       this.spoken = true;
@@ -416,8 +419,8 @@ export class CloudTranscribeSession {
         body: JSON.stringify({
           audio_url: uploaded.upload_url,
           language_code: this.lang === "en" ? "en" : "zh",
-          // best = 最高准确率模型；中文会自带标点
-          speech_model: "best",
+          // speech_model 已废弃；这里是官方给的两级回退，准确率最高
+          speech_models: ["universal-3-5-pro", "universal-2"],
           punctuate: true,
           format_text: true,
         }),

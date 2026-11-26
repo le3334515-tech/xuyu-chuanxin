@@ -3363,3 +3363,13 @@ html[lang^="zh"] .studio-content .workspace-intro h1 {
   background: #38b48b;
   flex: none;
 }
+
+/* 真实电平驱动时停用装饰动画，交给 inline height 表现 */
+.listening-bars[data-live="1"] i {
+  animation: none;
+  transform: none;
+  transition: height 0.09s linear, opacity 0.12s linear;
+}
+.listening-bars {
+  align-items: flex-end;
+}
