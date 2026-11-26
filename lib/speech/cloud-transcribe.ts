@@ -69,13 +69,13 @@ registerProcessor("pcm-recorder", PCMRecorder);
 `;
 
 const CONFIG_KEY = "xuyu.stt.config";
-const MAX_RECORD_MS = 20_000;
+const MAX_RECORD_MS = 15_000;
 /** 连续静音多久判定说完 */
-const SILENCE_HOLD_MS = 1_300;
+const SILENCE_HOLD_MS = 900;
 /** 一直没人说话就早点收工，别让人干等 30 秒 */
-const NO_SPEECH_LIMIT_MS = 8_000;
+const NO_SPEECH_LIMIT_MS = 6_000;
 /** 音量阈值（RMS） */
-const SILENCE_RMS = 0.012;
+const SILENCE_RMS = 0.009;
 
 export type StoredConfig = {
   provider: ProviderId;
@@ -416,6 +416,10 @@ export class CloudTranscribeSession {
         body: JSON.stringify({
           audio_url: uploaded.upload_url,
           language_code: this.lang === "en" ? "en" : "zh",
+          // best = 最高准确率模型；中文会自带标点
+          speech_model: "best",
+          punctuate: true,
+          format_text: true,
         }),
         signal: AbortSignal.timeout(20_000),
       });
@@ -433,9 +437,9 @@ export class CloudTranscribeSession {
         return;
       }
 
-      for (let attempt = 0; attempt < 40; attempt += 1) {
+      for (let attempt = 0; attempt < 60; attempt += 1) {
         if (this.closed) return;
-        await new Promise((resolve) => setTimeout(resolve, 1200));
+        await new Promise((resolve) => setTimeout(resolve, 600));
         const poll = await fetch(`https://api.assemblyai.com/v2/transcript/${job.id}`, {
           headers: { authorization: key },
           signal: AbortSignal.timeout(15_000),
