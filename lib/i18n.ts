@@ -277,10 +277,10 @@ type Copy = {
     keyProviderBrowser: string;
     keyProviderSf: string;
     keyProviderAai: string;
-    noticeClarified: (ms: number) => string;
+    noticeClarified: (ms: number, n: number) => string;
     noticeClarifyFallback: string;
     noticeClarifying: string;
-    noticeReplied: (ms: number) => string;
+    noticeReplied: (ms: number, n: number) => string;
     noticeQuestionReady: string;
     noticeFallback: string;
     fragmentLabel: string;
@@ -579,10 +579,10 @@ export const COPY: Record<Lang, Copy> = {
       keyProviderBrowser: "浏览器自带（免费）",
       keyProviderSf: "硅基流动 · 国内可充值",
       keyProviderAai: "AssemblyAI · 海外",
-      noticeClarified: (ms) => `补好了（${ms} 毫秒）。这是几条通顺的说法，选一条，或者自己改。`,
+      noticeClarified: (ms, n) => `补好了（${ms} 毫秒），共 ${n} 条。悬停可以看到差别，选一条，或者自己改。`,
       noticeClarifyFallback: "模型没接上，先把识别到的原话放在这儿，你可以直接改。",
       noticeClarifying: "正在把你说的话补成完整句子…",
-      noticeReplied: (ms) => `按对方的问题生成了三条（${ms} 毫秒）。挑一条，或者改一改。`,
+      noticeReplied: (ms, n) => `按对方的问题生成了 ${n} 条（${ms} 毫秒）。往下翻，挑一条，或者改一改。`,
       noticeQuestionReady: "问题已经填好。点「给我几个说法」，我按这个问题生成回答。",
       noticeFallback: "模型暂时没接上，这几条是按常见说法给的。可以自己改，或者再点一次。",
       fragmentLabel: "你说的话（识别片段）",
@@ -896,10 +896,10 @@ export const COPY: Record<Lang, Copy> = {
       keyProviderBrowser: "Browser built-in (free)",
       keyProviderSf: "SiliconFlow · China",
       keyProviderAai: "AssemblyAI · global",
-      noticeClarified: (ms) => `Smoothed it out (${ms} ms). Pick one, or edit it yourself.`,
+      noticeClarified: (ms, n) => `Smoothed it out (${ms} ms) — ${n} options. Pick one, or edit it.`,
       noticeClarifyFallback: "The model didn't answer — here is what was recognised, edit it directly.",
       noticeClarifying: "Turning what you said into a full sentence…",
-      noticeReplied: (ms) => `Three replies for that question (${ms} ms). Pick one, or edit it.`,
+      noticeReplied: (ms, n) => `${n} replies for that question (${ms} ms). Scroll down and pick one.`,
       noticeQuestionReady: "Question filled in. Tap “Suggest replies” to generate answers.",
       noticeFallback: "The model is unavailable — these are common phrasings. Edit, or try again.",
       fragmentLabel: "What you said (recognised)",

@@ -26,7 +26,7 @@ import {
   isBuiltinReady,
   type ProviderId,
 } from "@/lib/speech/zh-listen";
-import { clarifySpeech, generateReplies } from "@/lib/speech/llm";
+import { clarifySpeech, generateReplies, REPLY_COUNT } from "@/lib/speech/llm";
 import { suggestReplies } from "@/lib/speech/zh-replies";
 import { useCopy } from "@/components/lang-provider";
 
@@ -45,6 +45,23 @@ type Props = {
 type Phase = "idle" | "connecting" | "listening" | "thinking" | "ready" | "error";
 /** 这次录音是「听对方」还是「我自己说」 */
 type Mode = "listen" | "self";
+
+/** 把候选补到 10 条：模型给的优先，不够用本地规则补，去重后再截断 */
+function topUp(fromModel: string[], fromLocal: string[]): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  const push = (item: string) => {
+    const text = String(item ?? "").trim();
+    if (!text || out.length >= REPLY_COUNT) return;
+    const key = text.replace(/[。．.!！?？\s]/g, "");
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    out.push(text);
+  };
+  fromModel.forEach(push);
+  fromLocal.forEach(push);
+  return out;
+}
 
 /** 用户是否自己改过配置（用来区分「内置默认」和「自己填的」） */
 function hasCustom(): boolean {
@@ -157,25 +174,43 @@ export function ConversationAssist({
     const result = await generateReplies(target, extra, lang, controller.signal);
     if (id !== version.current) return;
 
-    if (result.candidates.length) {
-      setReplies(result.candidates);
-      setFragments("");
-      setPhase("ready");
-      setNotice(c.assist.noticeReplied(result.ms));
-      revealReplies();
-      return;
-    }
-
-    // 模型不可用：本地规则兜底
-    const fallback = suggestReplies(target, extra, lang);
-    setReplies(fallback);
+    // 模型给得不够就用本地规则补齐：始终保证 10 条可选
+    const merged = topUp(result.candidates, suggestReplies(target, extra, lang));
+    setReplies(merged);
     setFragments("");
     setPhase("ready");
-    setNotice(c.assist.noticeFallback);
+    setNotice(
+      result.candidates.length
+        ? c.assist.noticeReplied(result.ms, merged.length)
+        : c.assist.noticeFallback,
+    );
     revealReplies();
   }
 
   /* ── 我自己说：录自己的话 → 补成通顺句子 ─────────────────── */
+
+  /** 我自己说：碎片的补充意思也能重跑 */
+  async function remakeFromFragment() {
+    const fragment = fragments.trim();
+    if (!fragment) return;
+    const id = ++version.current;
+    setPhase("thinking");
+    setNotice(c.assist.noticeClarifying);
+    const lang: "zh" | "en" = language === "english" ? "en" : "zh";
+    const controller = new AbortController();
+    request.current = controller;
+    const result = await clarifySpeech(fragment, question, intent, lang, controller.signal);
+    if (id !== version.current) return;
+    if (result.candidates.length) {
+      setReplies(result.candidates);
+      setPhase("ready");
+      setNotice(c.assist.noticeClarified(result.ms, result.candidates.length));
+      revealReplies();
+      return;
+    }
+    setPhase("ready");
+    setNotice(c.assist.noticeClarifyFallback);
+  }
 
   function startSelf() {
     if (disabled) return;
@@ -223,22 +258,20 @@ export function ConversationAssist({
     const lang: "zh" | "en" = language === "english" ? "en" : "zh";
     const controller = new AbortController();
     request.current = controller;
-    const result = await clarifySpeech(fragment, question, lang, controller.signal);
+    const result = await clarifySpeech(fragment, question, intent, lang, controller.signal);
     if (id !== version.current) return;
 
-    if (result.candidates.length) {
-      setFragments(fragment);
-      setReplies(result.candidates);
-      setPhase("ready");
-      setNotice(c.assist.noticeClarified(result.ms));
-      revealReplies();
-      return;
-    }
-    // 模型不可用：至少把识别到的原样给他，能改
     setFragments(fragment);
-    setReplies([fragment]);
+    const merged = result.candidates.length
+      ? topUp(result.candidates, suggestReplies(question || fragment, intent, lang))
+      : [fragment];
+    setReplies(merged);
     setPhase("ready");
-    setNotice(c.assist.noticeClarifyFallback);
+    setNotice(
+      result.candidates.length
+        ? c.assist.noticeClarified(result.ms, merged.length)
+        : c.assist.noticeClarifyFallback,
+    );
     revealReplies();
   }
 
@@ -535,26 +568,26 @@ export function ConversationAssist({
             </label>
             <button
               className="button"
-              disabled={!question.trim() || busy || disabled}
+              disabled={(!question.trim() && !fragments.trim()) || busy || disabled}
               onClick={() => {
-                onStart();
                 setChosen(null);
-                void makeReplies(question, intent);
+                if (question.trim()) void makeReplies(question, intent);
+                else void remakeFromFragment();
               }}
             >
               {c.assist.suggestReplies}
               <ArrowRight size={15} />
             </button>
           </details>
-          {question && (
+          {(question.trim() || fragments.trim()) && (
             <form
               className="intent-form"
               onSubmit={(event) => {
                 event.preventDefault();
                 if (busy || disabled) return;
-                onStart();
                 setChosen(null);
-                void makeReplies(question, intent);
+                if (question.trim()) void makeReplies(question, intent);
+                else void remakeFromFragment();
               }}
             >
               <label htmlFor="reply-intent">{c.assist.somethingElse}</label>
