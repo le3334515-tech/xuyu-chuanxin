@@ -20,9 +20,9 @@ import {
 } from "lucide-react";
 import {
   SpeechListenSession as ListenSession,
-  PROVIDERS,
   readConfig,
   writeConfig,
+  isBuiltinReady,
   type ProviderId,
 } from "@/lib/speech/zh-listen";
 import { suggestReplies } from "@/lib/speech/zh-replies";
@@ -41,6 +41,15 @@ type Props = {
 };
 
 type Phase = "idle" | "connecting" | "listening" | "thinking" | "ready" | "error";
+
+/** 用户是否自己改过配置（用来区分「内置默认」和「自己填的」） */
+function hasCustom(): boolean {
+  try {
+    return localStorage.getItem("xuyu.stt.config") !== null;
+  } catch {
+    return false;
+  }
+}
 
 export function ConversationAssist({
   ref,
@@ -251,6 +260,15 @@ export function ConversationAssist({
           </button>
         </div>
         <p className="listening-privacy">{c.assist.privacy}</p>
+        <p className="listening-engine">
+          {sttConfig.provider === "browser"
+            ? c.assist.engineBrowser
+            : sttConfig.provider === "siliconflow"
+              ? c.assist.engineSf
+              : isBuiltinReady() && sttConfig.key === readConfig().key && !hasCustom()
+                ? c.assist.engineBuiltin
+                : c.assist.engineAai}
+        </p>
         <details className="listening-key">
           <summary>{c.assist.keyToggle}</summary>
           <div className="listening-key-body">

@@ -277,6 +277,10 @@ type Copy = {
     keyProviderBrowser: string;
     keyProviderSf: string;
     keyProviderAai: string;
+    engineBuiltin: string;
+    engineBrowser: string;
+    engineSf: string;
+    engineAai: string;
     noticeIdle: string;
     noticeCancel: string;
     noticeThinking: string;
@@ -543,7 +547,7 @@ export const COPY: Record<Lang, Copy> = {
       youChoose: "最终由你挑出像你的那一句。",
       listenOrTry: "听一个问题，或者用示例问题试试。你随时可以自己写。",
       speakingNotice: (text) => `正在念你这句话：「${text}」`,
-      keyToggle: "用 AssemblyAI key 提高识别可靠性（可选）",
+      keyToggle: "高级：改用我自己的语音服务",
       keyHint:
         "Chrome 自带识别的语音服务在某些网络下不可用。填入你自己的 AssemblyAI key 后，这里改用它的中文流式转写。key 只存在这台设备的浏览器里。",
       keyPlaceholder: "粘贴 AssemblyAI API key",
@@ -555,6 +559,10 @@ export const COPY: Record<Lang, Copy> = {
       keyProviderBrowser: "浏览器自带（免费）",
       keyProviderSf: "硅基流动 · 国内可充值",
       keyProviderAai: "AssemblyAI · 海外",
+      engineBuiltin: "当前已启用云端识别，开箱可用，不用配置。",
+      engineBrowser: "当前用的是浏览器自带识别（可能受网络限制）。",
+      engineSf: "当前用的是硅基流动语音识别。",
+      engineAai: "当前用的是你自己的 AssemblyAI 凭据。",
       noticeIdle: "对方问了一句。接下来由你决定。",
       noticeCancel: "已停止听音。说什么是你的事。",
       noticeThinking: "已停止听音。正在准备几种说法…",
@@ -836,7 +844,7 @@ export const COPY: Record<Lang, Copy> = {
       listenOrTry:
         "Listen to a question, or try the recorded example. You can always write your own.",
       speakingNotice: (text) => `Speaking your message: “${text}”`,
-      keyToggle: "Use an AssemblyAI key for reliable listening (optional)",
+      keyToggle: "Advanced: use my own speech service",
       keyHint:
         "Chrome's built-in recognition relies on an external service that some networks block. With your own AssemblyAI key, listening switches to its multilingual streaming transcription. The key stays in this browser.",
       keyPlaceholder: "Paste your AssemblyAI API key",
@@ -848,6 +856,10 @@ export const COPY: Record<Lang, Copy> = {
       keyProviderBrowser: "Browser built-in (free)",
       keyProviderSf: "SiliconFlow · China",
       keyProviderAai: "AssemblyAI · global",
+      engineBuiltin: "Cloud recognition is on and ready — nothing to configure.",
+      engineBrowser: "Using the browser's built-in recognition (may be blocked).",
+      engineSf: "Using SiliconFlow recognition.",
+      engineAai: "Using your own AssemblyAI key.",
       noticeIdle: "A question comes in. You choose what comes next.",
       noticeCancel: "Listening is off. Your words stay in your control.",
       noticeThinking: "Listening is off. Preparing a few possible replies…",

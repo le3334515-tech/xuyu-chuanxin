@@ -9,6 +9,8 @@
  * 所以纯静态站点可以直连，key 只存在本机。
  */
 
+import { BUILTIN_PROVIDER, builtinKey } from "@/lib/speech/builtin-key";
+
 export type ListenEvents = {
   onReady: () => void;
   onTranscript: (text: string) => void;
@@ -80,22 +82,29 @@ export type StoredConfig = {
   key: string;
 };
 
+const BUILTIN: StoredConfig = { provider: BUILTIN_PROVIDER, key: builtinKey() };
+
 export function readConfig(): StoredConfig {
   try {
     const raw = localStorage.getItem(CONFIG_KEY);
     if (raw) {
       const data = JSON.parse(raw) as StoredConfig;
       if (data && typeof data.key === "string") {
-        return {
-          provider: data.provider === "siliconflow" || data.provider === "assemblyai" ? data.provider : "browser",
-          key: data.key,
-        };
+        // 用户显式选过就听用户的
+        if (data.provider === "browser") return { provider: "browser", key: "" };
+        if (data.key) return { provider: data.provider, key: data.key };
       }
     }
   } catch {
     /* 隐私模式读不到 */
   }
-  return { provider: "browser", key: "" };
+  // 默认：内置凭据直连，打开就能用，不需要任何配置
+  return BUILTIN;
+}
+
+/** 界面里展示用：是否已经开箱可用 */
+export function isBuiltinReady(): boolean {
+  return BUILTIN.key.length > 0;
 }
 
 export function writeConfig(next: StoredConfig): void {
@@ -265,6 +274,18 @@ export class CloudTranscribeSession {
   async finish() {
     if (this.closed) return;
     const chunks = this.chunks;
+    const totalSamples = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
+    // 太短（<0.4 秒）说明没有有效语音，不必花额度
+    if (totalSamples < this.sampleRate * 0.4) {
+      this.stopCapture();
+      this.close();
+      this.events.onError(
+        this.lang === "en"
+          ? "That was too short. Hold the button, speak, then pause."
+          : "这次太短了。点一下「听一个问题」，说完停一下就好。",
+      );
+      return;
+    }
     this.stopCapture();
     if (!chunks.length) {
       this.close();

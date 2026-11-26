@@ -3345,3 +3345,21 @@ html[lang^="zh"] .studio-content .workspace-intro h1 {
   border-color: var(--signal);
   box-shadow: 0 0 0 3px rgba(104, 70, 220, 0.12);
 }
+
+/* 当前语音引擎状态（一行，不喧宾夺主） */
+.listening-engine {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.listening-engine::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38b48b;
+  flex: none;
+}

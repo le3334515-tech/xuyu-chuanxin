@@ -9,6 +9,7 @@
  */
 
 import { CloudTranscribeSession, readConfig } from "@/lib/speech/cloud-transcribe";
+import { checkRecordingEnv } from "@/lib/speech/env-check";
 
 export type ListenEvents = {
   onReady: () => void;
@@ -97,7 +98,14 @@ export class SpeechListenSession {
       return;
     }
 
-    // B 路：选了云端服务并填了 key → 录音 + 上传转写（中文可靠）
+    // 先查环境：微信内置浏览器之类的情况，直接告诉用户该怎么做
+    const issue = checkRecordingEnv();
+    if (issue) {
+      this.events.onError(this.lang === "en" ? issue.en : issue.zh);
+      return;
+    }
+
+    // B 路：默认就用内置凭据做录音 + 上传转写（中文可靠，开箱可用）
     const config = readConfig();
     if (config.provider !== "browser" && config.key) {
       const cloud = new CloudTranscribeSession(this.events, config);
@@ -268,4 +276,11 @@ export class SpeechListenSession {
   }
 }
 
-export { PROVIDERS, readConfig, writeConfig, type ProviderId, type StoredConfig } from "@/lib/speech/cloud-transcribe";
+export {
+  PROVIDERS,
+  readConfig,
+  writeConfig,
+  isBuiltinReady,
+  type ProviderId,
+  type StoredConfig,
+} from "@/lib/speech/cloud-transcribe";
