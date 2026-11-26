@@ -18,7 +18,7 @@ import {
   Square,
   Volume2,
 } from "lucide-react";
-import { SpeechListenSession as ListenSession } from "@/lib/speech/zh-listen";
+import { SpeechListenSession as ListenSession, readKey, writeKey } from "@/lib/speech/zh-listen";
 import { suggestReplies } from "@/lib/speech/zh-replies";
 import { useCopy } from "@/components/lang-provider";
 
@@ -55,6 +55,8 @@ export function ConversationAssist({
   const [notice, setNotice] = useState(c.assist.noticeIdle);
   const [sample, setSample] = useState(false);
   const [chosen, setChosen] = useState<string | null>(null);
+  const [keyDraft, setKeyDraft] = useState(() => readKey());
+  const [keyNotice, setKeyNotice] = useState("");
   const session = useRef<ListenSession | null>(null);
   const request = useRef<AbortController | null>(null);
   const questionEditor = useRef<HTMLDetailsElement>(null);
@@ -242,6 +244,50 @@ export function ConversationAssist({
           </button>
         </div>
         <p className="listening-privacy">{c.assist.privacy}</p>
+        <details className="listening-key">
+          <summary>{c.assist.keyToggle}</summary>
+          <div className="listening-key-body">
+            <p>{c.assist.keyHint}</p>
+            <div className="listening-key-row">
+              <input
+                type="password"
+                value={keyDraft}
+                placeholder={c.assist.keyPlaceholder}
+                autoComplete="off"
+                spellCheck={false}
+                onChange={(event) => setKeyDraft(event.target.value)}
+              />
+              <button
+                className="button"
+                onClick={() => {
+                  const clean = keyDraft.trim();
+                  if (clean && clean.length < 20) {
+                    setKeyNotice(c.assist.keyInvalid);
+                    return;
+                  }
+                  writeKey(clean);
+                  setKeyDraft(clean);
+                  setKeyNotice(clean ? c.assist.keySaved : c.assist.keyCleared);
+                }}
+              >
+                {c.assist.keySave}
+              </button>
+              <button
+                className="text-button"
+                onClick={() => {
+                  writeKey("");
+                  setKeyDraft("");
+                  setKeyNotice(c.assist.keyCleared);
+                }}
+              >
+                {c.assist.keyClear}
+              </button>
+            </div>
+            <p className="listening-key-notice" role="status">
+              {keyNotice}
+            </p>
+          </div>
+        </details>
       </div>
       <div className="conversation-flow">
         <div className="question-panel">

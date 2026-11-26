@@ -266,6 +266,14 @@ type Copy = {
     youChoose: string;
     listenOrTry: string;
     speakingNotice: (text: string) => string;
+    keyToggle: string;
+    keyHint: string;
+    keyPlaceholder: string;
+    keySave: string;
+    keyClear: string;
+    keySaved: string;
+    keyCleared: string;
+    keyInvalid: string;
     noticeIdle: string;
     noticeCancel: string;
     noticeThinking: string;
@@ -532,6 +540,15 @@ export const COPY: Record<Lang, Copy> = {
       youChoose: "最终由你挑出像你的那一句。",
       listenOrTry: "听一个问题，或者用示例问题试试。你随时可以自己写。",
       speakingNotice: (text) => `正在念你这句话：「${text}」`,
+      keyToggle: "用 AssemblyAI key 提高识别可靠性（可选）",
+      keyHint:
+        "Chrome 自带识别的语音服务在某些网络下不可用。填入你自己的 AssemblyAI key 后，这里改用它的中文流式转写。key 只存在这台设备的浏览器里。",
+      keyPlaceholder: "粘贴 AssemblyAI API key",
+      keySave: "保存并使用",
+      keyClear: "清除",
+      keySaved: "已保存，下次点「听一个问题」就走云端转写。",
+      keyCleared: "已清除，回到浏览器自带识别。",
+      keyInvalid: "key 看起来不对（AssemblyAI 的 key 通常 32 位字符）。",
       noticeIdle: "对方问了一句。接下来由你决定。",
       noticeCancel: "已停止听音。说什么是你的事。",
       noticeThinking: "已停止听音。正在准备几种说法…",
@@ -813,6 +830,15 @@ export const COPY: Record<Lang, Copy> = {
       listenOrTry:
         "Listen to a question, or try the recorded example. You can always write your own.",
       speakingNotice: (text) => `Speaking your message: “${text}”`,
+      keyToggle: "Use an AssemblyAI key for reliable listening (optional)",
+      keyHint:
+        "Chrome's built-in recognition relies on an external service that some networks block. With your own AssemblyAI key, listening switches to its multilingual streaming transcription. The key stays in this browser.",
+      keyPlaceholder: "Paste your AssemblyAI API key",
+      keySave: "Save and use",
+      keyClear: "Clear",
+      keySaved: "Saved. The next Listen uses cloud transcription.",
+      keyCleared: "Cleared. Back to the browser's own recognition.",
+      keyInvalid: "That doesn't look like an AssemblyAI key (usually 32 characters).",
       noticeIdle: "A question comes in. You choose what comes next.",
       noticeCancel: "Listening is off. Your words stay in your control.",
       noticeThinking: "Listening is off. Preparing a few possible replies…",

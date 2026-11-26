@@ -1,12 +1,14 @@
 /**
- * 听音：与 lib/assemblyai/listen-session.ts 相同的对外契约
+ * 听音的路由层：对外仍是 `SpeechListenSession`
  * （onReady / onTranscript / onQuestion / onError + start / close），
- * 引擎换成浏览器语音识别。
+ * 内部按是否配置了 AssemblyAI key 选择引擎。
  *
- * 浏览器识别的现实：Chrome 的 webkitSpeechRecognition 依赖外部语音服务，
- * 在某些网络下 start 之后「静默卡死」—— 不给 result、不给 error、不给 end。
- * 原版有超时保护，这里同样必须有，否则界面会永远停在「正在听…」。
+ * A 路（默认，免费）：浏览器语音识别。Edge 通常可用；Chrome 依赖外部语音服务，
+ *   部分网络下按下之后完全静默 —— 所以必须有看门狗，不能让界面卡在「正在听…」。
+ * B 路（填了 key）：AssemblyAI 多语言流式转写，中文可靠，见 cloud-listen.ts。
  */
+
+import { CloudListenSession, hasKey } from "@/lib/speech/cloud-listen";
 
 export type ListenEvents = {
   onReady: () => void;
@@ -34,7 +36,6 @@ const SAMPLE_QUESTION: Record<string, string> = {
   en: "Are you ready to order, or do you need a minute?",
 };
 
-/** 多久没有任何进展就判定识别服务无响应 */
 const SILENCE_TIMEOUT_MS = 12_000;
 const MAX_SESSION_MS = 30_000;
 
@@ -53,17 +54,22 @@ function isEdge(): boolean {
   return /Edg\//.test(navigator.userAgent);
 }
 
-function networkHint(): string {
-  if (typeof navigator === "undefined") return "";
+function networkHint(lang: "zh" | "en"): string {
+  if (lang === "en") {
+    return isEdge()
+      ? "The listening service did not respond. Try again, add your AssemblyAI key under the text box, or type the question."
+      : "This browser's speech recognition did not respond — Chrome relies on an external speech service. Add your AssemblyAI key under the text box, switch to Edge, or type the question.";
+  }
   return isEdge()
-    ? "识别服务没有响应。已帮你打开输入框：直接打问题也能拿到三条说法；换用 Edge 还能用麦克风。"
-    : "这个浏览器的语音识别这次没有响应（Chrome 依赖外部语音服务，某些网络下会这样）。已帮你打开下面的输入框：直接打问题也能拿到三条说法，或者换用 Edge 再用麦克风。";
+    ? "识别服务没有响应。可以重试，在下面填 AssemblyAI key 会更稳，或者直接把问题打出来。"
+    : "这个浏览器的语音识别没有响应（Chrome 依赖外部语音服务，某些网络下会这样）。可以在下面填 AssemblyAI 的 key 换成可靠的转写，或者直接把问题打出来。";
 }
 
 export class SpeechListenSession {
+  private cloud: CloudListenSession | null = null;
   private recognition: RecognitionLike | null = null;
   private closed = false;
-  private lang: string = "zh";
+  private lang: "zh" | "en" = "zh";
   private sampleTimer: ReturnType<typeof setTimeout> | null = null;
   private silenceTimer: ReturnType<typeof setTimeout> | null = null;
   private sessionTimer: ReturnType<typeof setTimeout> | null = null;
@@ -74,11 +80,13 @@ export class SpeechListenSession {
 
   setLanguage(lang: string) {
     this.lang = lang === "en" || lang === "english" ? "en" : "zh";
+    this.cloud?.setLanguage(this.lang);
   }
 
   async start(recordedQuestion = false) {
     if (this.closed) return;
 
+    // 示例问题：不占麦克风、不依赖任何服务，用来验证「听 → 三条说法 → 念」这条链路
     if (recordedQuestion) {
       this.events.onReady();
       this.events.onTranscript(this.lang === "en" ? "Listening…" : "正在听…");
@@ -89,12 +97,22 @@ export class SpeechListenSession {
       return;
     }
 
+    // B 路：填了 key 就走云端流式转写（中文可靠）
+    if (hasKey()) {
+      const cloud = new CloudListenSession(this.events);
+      cloud.setLanguage(this.lang);
+      this.cloud = cloud;
+      await cloud.start(false);
+      return;
+    }
+
+    // A 路：浏览器识别
     const recognition = recognitionFactory();
     if (!recognition) {
       this.events.onError(
         this.lang === "en"
-          ? "This browser has no speech recognition. Type the question instead, or use Edge."
-          : "这个浏览器不支持语音识别。可以把问题打出来，或换用 Edge。",
+          ? "This browser has no speech recognition. Type the question instead, or add your AssemblyAI key below."
+          : "这个浏览器不支持语音识别。可以把问题打出来，或者在下面填 AssemblyAI 的 key。",
       );
       return;
     }
@@ -156,7 +174,7 @@ export class SpeechListenSession {
         return;
       }
       if (code === "network") {
-        this.events.onError(networkHint());
+        this.events.onError(networkHint(this.lang));
         return;
       }
       this.events.onError(
@@ -170,20 +188,18 @@ export class SpeechListenSession {
       if (this.closed) return;
       this.clearTimers();
       if (this.delivered) return;
-      // 结束了却没拿到一句话：别让界面停在「正在听…」
       this.events.onError(
         this.heardSomething
           ? this.lang === "en"
             ? "That was cut off. Try once more, or type the question."
             : "这句没听完。再说一次，或者把问题打出来。"
-          : networkHint(),
+          : networkHint(this.lang),
       );
     };
 
     this.recognition = recognition;
     try {
       recognition.start();
-      // start 之前也要有表：某些实现连 onstart 都不触发
       this.armSilenceTimer();
       this.sessionTimer = setTimeout(() => {
         if (this.closed || this.delivered) return;
@@ -214,13 +230,12 @@ export class SpeechListenSession {
     this.events.onQuestion(clean);
   }
 
-  /** 无进展就看门狗：识别服务静默卡死时给用户一条出路 */
   private armSilenceTimer() {
     if (this.silenceTimer) clearTimeout(this.silenceTimer);
     this.silenceTimer = setTimeout(() => {
       if (this.closed || this.delivered) return;
       this.stopRecognition();
-      this.events.onError(networkHint());
+      this.events.onError(networkHint(this.lang));
     }, SILENCE_TIMEOUT_MS);
   }
 
@@ -247,5 +262,9 @@ export class SpeechListenSession {
     this.sampleTimer = null;
     this.clearTimers();
     this.stopRecognition();
+    this.cloud?.close();
+    this.cloud = null;
   }
 }
+
+export { hasKey, readKey, writeKey } from "@/lib/speech/cloud-listen";
