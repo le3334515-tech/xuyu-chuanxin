@@ -9,6 +9,8 @@
  * 所以纯静态站点可以直连，key 只存在本机。
  */
 
+import { asset } from "@/lib/asset";
+
 export type ListenEvents = {
   onReady: () => void;
   onTranscript: (text: string) => void;
@@ -153,7 +155,7 @@ export class CloudTranscribeSession {
       this.sampleRate = context.sampleRate;
       if (this.closed) return;
 
-      await context.audioWorklet.addModule("/audio/pcm-worklet.js");
+      await context.audioWorklet.addModule(asset("/audio/pcm-worklet.js"));
       if (this.closed) return;
 
       const source = context.createMediaStreamSource(stream);
@@ -178,14 +180,15 @@ export class CloudTranscribeSession {
     } catch (error) {
       if (this.closed) return;
       const name = error instanceof Error ? error.name : "";
+      const reason = error instanceof Error ? error.message : String(error);
       this.events.onError(
         name === "NotAllowedError"
           ? this.lang === "en"
             ? "Microphone access was declined. You can type the question."
             : "麦克风被拒绝了。可以把问题打出来。"
           : this.lang === "en"
-            ? "The microphone couldn't start. Type the question instead."
-            : "麦克风没能打开。把问题打出来也可以。",
+            ? `The microphone couldn't start (${reason}). Type the question instead.`
+            : `麦克风没能打开（${reason}）。把问题打出来也可以。`,
       );
       this.close();
     }
