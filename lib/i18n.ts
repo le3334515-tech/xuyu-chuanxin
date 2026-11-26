@@ -294,6 +294,9 @@ type Copy = {
     startSelf: string;
     noticeSelfStart: string;
     noticeSelfListening: string;
+    stepListen: string;
+    stepTranscribe: string;
+    stepDone: string;
     engineBuiltin: string;
     engineBrowser: string;
     engineSf: string;
@@ -593,6 +596,9 @@ export const COPY: Record<Lang, Copy> = {
       startSelf: "开始说，我听着",
       noticeSelfStart: "准备好就说，说完停一下我就知道你说完了。",
       noticeSelfListening: "我在听。说不清楚也没关系，我会结合上下文猜你想说什么。",
+      stepListen: "① 听你说",
+      stepTranscribe: "② 转成文字",
+      stepDone: "③ 补成句子",
       engineBuiltin: "当前已启用云端识别，开箱可用，不用配置。",
       engineBrowser: "当前用的是浏览器自带识别（可能受网络限制）。",
       engineSf: "当前用的是硅基流动语音识别。",
@@ -907,6 +913,9 @@ export const COPY: Record<Lang, Copy> = {
       startSelf: "Start talking, I'm listening",
       noticeSelfStart: "Speak when ready; pause and I'll know you finished.",
       noticeSelfListening: "I'm listening. Unclear is fine — I'll infer from context.",
+      stepListen: "① Listening",
+      stepTranscribe: "② Transcribing",
+      stepDone: "③ Smoothing",
       engineBuiltin: "Cloud recognition is on and ready — nothing to configure.",
       engineBrowser: "Using the browser's built-in recognition (may be blocked).",
       engineSf: "Using SiliconFlow recognition.",

@@ -3471,3 +3471,40 @@ html[lang^="zh"] .studio-content .workspace-intro h1 {
   .mode-card { grid-template-columns: auto 1fr; align-items: center; }
   .mode-card span { grid-column: 2; }
 }
+
+/* 三段式进度：让用户知道现在走到哪一步 */
+.stage-steps {
+  display: flex;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 22px 0;
+  list-style: none;
+  flex-wrap: wrap;
+}
+.stage-steps li {
+  font-size: 11.5px;
+  letter-spacing: 0.02em;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  color: var(--faint, #8b8397);
+  background: var(--surface);
+  transition: all 0.2s;
+}
+.stage-steps li[data-on="true"] {
+  color: var(--ink);
+  border-color: var(--hair, #d9d3e6);
+}
+.stage-steps li[data-active="true"] {
+  color: #fff;
+  background: var(--signal);
+  border-color: var(--signal);
+  animation: step-pulse 1.1s ease-in-out infinite;
+}
+@keyframes step-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage-steps li[data-active="true"] { animation: none; }
+}

@@ -80,6 +80,7 @@ export function ConversationAssist({
   const request = useRef<AbortController | null>(null);
   const version = useRef(0);
   const questionEditor = useRef<HTMLDetailsElement>(null);
+  const replyPanel = useRef<HTMLDivElement>(null);
   const busy = phase === "connecting" || phase === "listening" || phase === "thinking";
 
   const [sttConfig, setSttConfig] = useState(() => {
@@ -90,6 +91,13 @@ export function ConversationAssist({
   const [keyDraft, setKeyDraft] = useState(() => readConfig().key);
   const [keyNotice, setKeyNotice] = useState("");
   const [level, setLevel] = useState(0);
+
+  /** 结果一出来就滚到能看见的地方，手机上不至于以为没反应 */
+  const revealReplies = useCallback(() => {
+    requestAnimationFrame(() => {
+      replyPanel.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    });
+  }, []);
 
   const cleanup = useCallback(() => {
     version.current++;
@@ -154,6 +162,7 @@ export function ConversationAssist({
       setFragments("");
       setPhase("ready");
       setNotice(c.assist.noticeReplied(result.ms));
+      revealReplies();
       return;
     }
 
@@ -163,6 +172,7 @@ export function ConversationAssist({
     setFragments("");
     setPhase("ready");
     setNotice(c.assist.noticeFallback);
+    revealReplies();
   }
 
   /* ── 我自己说：录自己的话 → 补成通顺句子 ─────────────────── */
@@ -221,6 +231,7 @@ export function ConversationAssist({
       setReplies(result.candidates);
       setPhase("ready");
       setNotice(c.assist.noticeClarified(result.ms));
+      revealReplies();
       return;
     }
     // 模型不可用：至少把识别到的原样给他，能改
@@ -228,6 +239,7 @@ export function ConversationAssist({
     setReplies([fragment]);
     setPhase("ready");
     setNotice(c.assist.noticeClarifyFallback);
+    revealReplies();
   }
 
   /* ── 听一个问题：录对方的话，只填问题，不自动生成 ───────────── */
@@ -562,7 +574,7 @@ export function ConversationAssist({
             </form>
           )}
         </div>
-        <div className="reply-panel" aria-busy={phase === "thinking"}>
+        <div className="reply-panel" aria-busy={phase === "thinking"} ref={replyPanel}>
           <span className="conversation-label">{c.assist.possibleReplies}</span>
           <p className="authorship-note" title={c.assist.authorshipHint}>
             {c.assist.authorship}
@@ -615,6 +627,19 @@ export function ConversationAssist({
           )}
         </div>
       </div>
+      {(busy || phase === "ready") && (
+        <ol className="stage-steps" aria-hidden="true">
+          <li data-on="true" data-active={phase === "connecting" || phase === "listening"}>
+            {c.assist.stepListen}
+          </li>
+          <li data-on={phase === "thinking" || phase === "ready"} data-active={phase === "thinking"}>
+            {c.assist.stepTranscribe}
+          </li>
+          <li data-on={phase === "ready"} data-active={phase === "ready"}>
+            {c.assist.stepDone}
+          </li>
+        </ol>
+      )}
       <p className="conversation-notice" role="status">
         {disabled ? c.assist.speakingNotice(speakingText) : notice}
       </p>
