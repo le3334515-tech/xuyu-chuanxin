@@ -257,10 +257,8 @@ export function SpeechScene({
         {compact && revised && (
           <div className="revision-receipt">
             <PencilLine size={13} />
-            Revised message{" "}
-            <span>
-              {changed.size} {changed.size === 1 ? "new word" : "new words"}
-            </span>
+            {c.scene.revisedReceipt}{" "}
+            <span>{c.scene.changedWords(changed.size)}</span>
           </div>
         )}
         <p

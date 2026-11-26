@@ -143,6 +143,8 @@ type Copy = {
     noTiming: string;
     finishedNote: string;
     timingNote: string;
+    revisedReceipt: string;
+    changedWords: (n: number) => string;
   };
 
   studio: {
@@ -407,6 +409,8 @@ export const COPY: Record<Lang, Copy> = {
       noTiming: "停下时还没拿到逐词时间。",
       finishedNote: "一句说完了。下一句，慢慢来。",
       timingNote: "逐词高亮跟着播放走。",
+      revisedReceipt: "修订后的版本",
+      changedWords: (n) => `${n} 处改动`,
     },
     studio: {
       workspaceLabel: "你的说话空间",
@@ -682,6 +686,8 @@ export const COPY: Record<Lang, Copy> = {
       noTiming: "Stopped before word timing arrived.",
       finishedNote: "A thought, spoken. Take your time with the next.",
       timingNote: "Word highlights follow playback timing.",
+      revisedReceipt: "Revised message",
+      changedWords: (n) => `${n} ${n === 1 ? "new word" : "new words"}`,
     },
     studio: {
       workspaceLabel: "YOUR SPEAKING SPACE",

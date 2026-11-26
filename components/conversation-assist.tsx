@@ -57,6 +57,7 @@ export function ConversationAssist({
   const [chosen, setChosen] = useState<string | null>(null);
   const session = useRef<ListenSession | null>(null);
   const request = useRef<AbortController | null>(null);
+  const questionEditor = useRef<HTMLDetailsElement>(null);
   const version = useRef(0);
   const busy = phase === "connecting" || phase === "listening" || phase === "thinking";
 
@@ -148,6 +149,10 @@ export function ConversationAssist({
         if (id !== version.current) return;
         setPhase("error");
         setNotice(error);
+        // 识别走不通时，把打字的入口打开 —— 别让用户卡在死路
+        if (questionEditor.current && !question.trim()) {
+          questionEditor.current.open = true;
+        }
       },
     });
     next.setLanguage(language);
@@ -254,7 +259,7 @@ export function ConversationAssist({
               ))}
             </div>
           )}
-          <details className="question-editor">
+          <details className="question-editor" ref={questionEditor}>
             <summary>{c.assist.typeOrCorrect}</summary>
             <label>
               {c.assist.questionLabel}
