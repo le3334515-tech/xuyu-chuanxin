@@ -26,8 +26,8 @@ import {
   isBuiltinReady,
   type ProviderId,
 } from "@/lib/speech/zh-listen";
+import { clarifySpeech, generateReplies } from "@/lib/speech/llm";
 import { suggestReplies } from "@/lib/speech/zh-replies";
-import { clarifySpeech, looksBroken } from "@/lib/speech/clarify";
 import { useCopy } from "@/components/lang-provider";
 
 export type ConversationHandle = { cancel: () => void };
@@ -43,6 +43,8 @@ type Props = {
 };
 
 type Phase = "idle" | "connecting" | "listening" | "thinking" | "ready" | "error";
+/** 这次录音是「听对方」还是「我自己说」 */
+type Mode = "listen" | "self";
 
 /** 用户是否自己改过配置（用来区分「内置默认」和「自己填的」） */
 function hasCustom(): boolean {
@@ -72,6 +74,14 @@ export function ConversationAssist({
   const [notice, setNotice] = useState(c.assist.noticeIdle);
   const [sample, setSample] = useState(false);
   const [chosen, setChosen] = useState<string | null>(null);
+  const [fragments, setFragments] = useState("");
+  const [mode, setMode] = useState<Mode>("listen");
+  const session = useRef<ListenSession | null>(null);
+  const request = useRef<AbortController | null>(null);
+  const version = useRef(0);
+  const questionEditor = useRef<HTMLDetailsElement>(null);
+  const busy = phase === "connecting" || phase === "listening" || phase === "thinking";
+
   const [sttConfig, setSttConfig] = useState(() => {
     // 旧版本留下的脏配置会盖掉内置凭据，先清掉再读
     clearLegacyConfig();
@@ -80,13 +90,6 @@ export function ConversationAssist({
   const [keyDraft, setKeyDraft] = useState(() => readConfig().key);
   const [keyNotice, setKeyNotice] = useState("");
   const [level, setLevel] = useState(0);
-  const session = useRef<ListenSession | null>(null);
-  const request = useRef<AbortController | null>(null);
-  const questionEditor = useRef<HTMLDetailsElement>(null);
-  const lastQuestion = useRef("");
-  const [fragments, setFragments] = useState("");
-  const version = useRef(0);
-  const busy = phase === "connecting" || phase === "listening" || phase === "thinking";
 
   const cleanup = useCallback(() => {
     version.current++;
@@ -99,6 +102,7 @@ export function ConversationAssist({
   const cancel = useCallback(() => {
     cleanup();
     setPhase("idle");
+    setLevel(0);
     setNotice(c.assist.noticeCancel);
   }, [cleanup, c.assist.noticeCancel]);
 
@@ -122,80 +126,127 @@ export function ConversationAssist({
     };
   }, [cancel, cleanup]);
 
-  // 切换语言时重置提示语与候选，避免中英混排
   useEffect(() => {
     setNotice(c.assist.noticeIdle);
     setReplies([]);
     setChosen(null);
+    setFragments("");
     setPhase("idle");
   }, [c.assist.noticeIdle]);
 
-  async function suggest(text: string, id: number, meaning = "") {
-    if (id !== version.current || !text.trim()) return;
-    setQuestion(text);
+  /* ── 生成回答：只由用户点「给我几个说法」触发 ───────────────── */
+
+  async function makeReplies(text: string, extra: string) {
+    const target = String(text ?? "").trim();
+    if (!target) return;
+    const id = ++version.current;
     setPhase("thinking");
     setNotice(c.assist.noticeThinking);
     const lang: "zh" | "en" = language === "english" ? "en" : "zh";
 
-    // 打着「按我的意思重写」时不需要猜，直接按意思成句
-    if (meaning.trim()) {
-      const next = suggestReplies(text, meaning, lang);
-      if (id !== version.current) return;
-      setReplies(next);
-      setPhase("ready");
-      setNotice(c.assist.noticeShaped);
-      return;
-    }
-
-    // 两种输入走两条路：
-    //  - 破碎片段（说话不清楚）→ 补成「你想说的那句话」
-    //  - 完整问句（对方在问）→ 给出三条回复
-    const raw = text.trim();
-    const broken = looksBroken(raw);
-
-    if (!broken) {
-      lastQuestion.current = raw;
-      const next = suggestReplies(raw, "", lang);
-      if (id !== version.current) return;
-      setFragments("");
-      setReplies(next);
-      setPhase("ready");
-      setNotice(c.assist.noticeReady);
-      return;
-    }
-
-    // 破碎：交给模型结合上下文猜意思
-    const clarified = await clarifySpeech(raw, lastQuestion.current, lang);
+    const controller = new AbortController();
+    request.current = controller;
+    const result = await generateReplies(target, extra, lang, controller.signal);
     if (id !== version.current) return;
 
-    if (clarified.candidates.length) {
-      setFragments(raw);
-      setReplies(clarified.candidates);
+    if (result.candidates.length) {
+      setReplies(result.candidates);
+      setFragments("");
       setPhase("ready");
-      setNotice(c.assist.noticeClarified(clarified.ms));
+      setNotice(c.assist.noticeReplied(result.ms));
       return;
     }
 
-    // 模型不可用：回落到本地规则，仍然让用户有得选
-    const fallback = suggestReplies(raw, "", lang);
-    setFragments(raw);
+    // 模型不可用：本地规则兜底
+    const fallback = suggestReplies(target, extra, lang);
     setReplies(fallback);
+    setFragments("");
     setPhase("ready");
     setNotice(c.assist.noticeFallback);
   }
 
-  function start(recorded = false) {
+  /* ── 我自己说：录自己的话 → 补成通顺句子 ─────────────────── */
+
+  function startSelf() {
+    if (disabled) return;
+    onStart();
+    cleanup();
+    const id = version.current;
+    setMode("self");
+    setReplies([]);
+    setChosen(null);
+    setFragments("");
+    setSample(false);
+    setPhase("connecting");
+    setNotice(c.assist.noticeSelfStart);
+
+    const next = new ListenSession({
+      onLevel: (value) => {
+        if (id === version.current) setLevel(value);
+      },
+      onReady: () => {
+        if (id !== version.current) return;
+        setPhase("listening");
+        setNotice(c.assist.noticeSelfListening);
+      },
+      onTranscript: (text) => {
+        if (id === version.current) setFragments(text);
+      },
+      onQuestion: (text) => {
+        if (id === version.current) void clarifySelf(text, id);
+      },
+      onError: (error) => {
+        if (id !== version.current) return;
+        setPhase("error");
+        setLevel(0);
+        setNotice(error);
+      },
+    });
+    next.setLanguage(language);
+    session.current = next;
+    void next.start(false);
+  }
+
+  async function clarifySelf(fragment: string, id: number) {
+    setPhase("thinking");
+    setNotice(c.assist.noticeClarifying);
+    const lang: "zh" | "en" = language === "english" ? "en" : "zh";
+    const controller = new AbortController();
+    request.current = controller;
+    const result = await clarifySpeech(fragment, question, lang, controller.signal);
+    if (id !== version.current) return;
+
+    if (result.candidates.length) {
+      setFragments(fragment);
+      setReplies(result.candidates);
+      setPhase("ready");
+      setNotice(c.assist.noticeClarified(result.ms));
+      return;
+    }
+    // 模型不可用：至少把识别到的原样给他，能改
+    setFragments(fragment);
+    setReplies([fragment]);
+    setPhase("ready");
+    setNotice(c.assist.noticeClarifyFallback);
+  }
+
+  /* ── 听一个问题：录对方的话，只填问题，不自动生成 ───────────── */
+
+  function startListen(recorded = false) {
     if (disabled || (!recorded && !consent)) return;
     onStart();
     cleanup();
     const id = version.current;
+    setMode("listen");
     setReplies([]);
     setChosen(null);
+    setFragments("");
     setQuestion("");
     setIntent("");
     setSample(recorded);
     setPhase("connecting");
     setNotice(recorded ? c.assist.noticeRecordedOpen : c.assist.noticeMicOpen);
+
     const next = new ListenSession({
       onLevel: (value) => {
         if (id === version.current) setLevel(value);
@@ -209,16 +260,20 @@ export function ConversationAssist({
         if (id === version.current) setQuestion(text);
       },
       onQuestion: (text) => {
-        if (id === version.current) void suggest(text, id);
+        if (id !== version.current) return;
+        // 只把问题填好，让用户自己决定什么时候生成
+        setQuestion(text);
+        setPhase("idle");
+        setLevel(0);
+        setNotice(c.assist.noticeQuestionReady);
+        if (questionEditor.current) questionEditor.current.open = true;
       },
       onError: (error) => {
         if (id !== version.current) return;
         setPhase("error");
+        setLevel(0);
         setNotice(error);
-        // 识别走不通时，把打字的入口打开 —— 别让用户卡在死路
-        if (questionEditor.current && !question.trim()) {
-          questionEditor.current.open = true;
-        }
+        if (questionEditor.current && !question.trim()) questionEditor.current.open = true;
       },
     });
     next.setLanguage(language);
@@ -228,9 +283,11 @@ export function ConversationAssist({
 
   const listenState =
     phase === "listening"
-      ? sample
-        ? c.assist.recorded
-        : c.assist.micOn
+      ? mode === "self"
+        ? c.assist.micOnSelf
+        : sample
+          ? c.assist.recorded
+          : c.assist.micOn
       : phase === "connecting" && !sample
         ? c.assist.micOpening
         : c.assist.micOff;
@@ -253,6 +310,7 @@ export function ConversationAssist({
           {listenState}
         </span>
       </div>
+
       <div className="conversation-start">
         <label className="listening-consent">
           <input
@@ -263,6 +321,29 @@ export function ConversationAssist({
           />
           {c.assist.consent}
         </label>
+
+        {/* 两个入口：听别人说 / 我自己说 */}
+        <div className="conversation-modes">
+          <button
+            className={`mode-card ${mode === "listen" ? "is-on" : ""}`}
+            disabled={disabled || busy}
+            onClick={() => setMode("listen")}
+          >
+            <Ear size={18} />
+            <strong>{c.assist.modeListenTitle}</strong>
+            <span>{c.assist.modeListenHint}</span>
+          </button>
+          <button
+            className={`mode-card ${mode === "self" ? "is-on" : ""}`}
+            disabled={disabled || busy}
+            onClick={() => setMode("self")}
+          >
+            <Mic size={18} />
+            <strong>{c.assist.modeSelfTitle}</strong>
+            <span>{c.assist.modeSelfHint}</span>
+          </button>
+        </div>
+
         <div className="conversation-controls">
           {disabled && (
             <button className="button stop-button" onClick={onStop}>
@@ -275,24 +356,31 @@ export function ConversationAssist({
               <Square size={15} />
               {c.assist.cancelListening}
             </button>
+          ) : mode === "self" ? (
+            <button className="button primary listen-button" onClick={startSelf}>
+              <Mic size={17} />
+              {c.assist.startSelf}
+            </button>
           ) : (
             <button
               className="button primary listen-button"
               disabled={!consent || disabled}
-              onClick={() => start()}
+              onClick={() => startListen()}
             >
               <Mic size={17} />
               {c.assist.listenToQuestion}
             </button>
           )}
-          <button
-            className="text-button"
-            disabled={busy || disabled}
-            onClick={() => start(true)}
-          >
-            <Play size={14} />
-            {c.assist.tryRecorded}
-          </button>
+          {mode === "listen" && (
+            <button
+              className="text-button"
+              disabled={busy || disabled}
+              onClick={() => startListen(true)}
+            >
+              <Play size={14} />
+              {c.assist.tryRecorded}
+            </button>
+          )}
           <button
             className="text-button hold-turn"
             disabled={disabled}
@@ -317,6 +405,7 @@ export function ConversationAssist({
                 ? c.assist.engineBuiltin
                 : c.assist.engineAai}
         </p>
+
         <details className="listening-key">
           <summary>{c.assist.keyToggle}</summary>
           <div className="listening-key-body">
@@ -379,6 +468,7 @@ export function ConversationAssist({
           </div>
         </details>
       </div>
+
       <div className="conversation-flow">
         <div className="question-panel">
           <span className="conversation-label">
@@ -388,7 +478,7 @@ export function ConversationAssist({
           <p className="heard-question">
             {question || (phase === "listening" ? c.assist.listening : c.assist.whatBack)}
           </p>
-          {fragments && (
+          {fragments && fragments !== question && (
             <p className="heard-fragment">
               <span>{c.assist.fragmentLabel}</span>
               {fragments}
@@ -397,7 +487,6 @@ export function ConversationAssist({
           {(phase === "listening" || phase === "thinking") && (
             <div className="listening-bars" aria-hidden="true" data-live={level > 0.02 ? "1" : "0"}>
               {Array.from({ length: 16 }, (_, i) => {
-                // 真实电平：中间高两头低，跟着说话起伏
                 const shape = 1 - Math.abs(i - 7.5) / 9;
                 const height = 8 + level * 46 * shape;
                 return (
@@ -420,13 +509,14 @@ export function ConversationAssist({
               <textarea
                 maxLength={700}
                 value={question}
-                disabled={busy || disabled}
+                disabled={disabled}
                 onChange={(event) => {
                   cleanup();
                   setSample(false);
                   setQuestion(event.target.value);
                   setReplies([]);
                   setChosen(null);
+                  setFragments("");
                   setPhase("idle");
                 }}
               />
@@ -436,10 +526,8 @@ export function ConversationAssist({
               disabled={!question.trim() || busy || disabled}
               onClick={() => {
                 onStart();
-                cleanup();
-                setReplies([]);
                 setChosen(null);
-                void suggest(question, version.current);
+                void makeReplies(question, intent);
               }}
             >
               {c.assist.suggestReplies}
@@ -451,12 +539,10 @@ export function ConversationAssist({
               className="intent-form"
               onSubmit={(event) => {
                 event.preventDefault();
-                if (!intent.trim() || busy || disabled) return;
+                if (busy || disabled) return;
                 onStart();
-                cleanup();
-                setReplies([]);
                 setChosen(null);
-                void suggest(question, version.current, intent);
+                void makeReplies(question, intent);
               }}
             >
               <label htmlFor="reply-intent">{c.assist.somethingElse}</label>
@@ -465,21 +551,11 @@ export function ConversationAssist({
                 id="reply-intent"
                 value={intent}
                 maxLength={160}
-                disabled={busy || disabled}
+                disabled={disabled}
                 placeholder={c.assist.intentPlaceholder}
-                onChange={(event) => {
-                  cleanup();
-                  setIntent(event.target.value);
-                  setReplies([]);
-                  setChosen(null);
-                  setPhase("idle");
-                }}
+                onChange={(event) => setIntent(event.target.value)}
               />
-              <button
-                className="button"
-                disabled={!intent.trim() || busy || disabled}
-                type="submit"
-              >
+              <button className="button" disabled={busy || disabled} type="submit">
                 {c.assist.shapeReply}
                 <ArrowRight size={15} />
               </button>

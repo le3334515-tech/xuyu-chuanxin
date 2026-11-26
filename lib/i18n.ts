@@ -278,10 +278,22 @@ type Copy = {
     keyProviderSf: string;
     keyProviderAai: string;
     noticeClarified: (ms: number) => string;
+    noticeClarifyFallback: string;
+    noticeClarifying: string;
+    noticeReplied: (ms: number) => string;
+    noticeQuestionReady: string;
     noticeFallback: string;
     fragmentLabel: string;
     authorship: string;
     authorshipHint: string;
+    micOnSelf: string;
+    modeListenTitle: string;
+    modeListenHint: string;
+    modeSelfTitle: string;
+    modeSelfHint: string;
+    startSelf: string;
+    noticeSelfStart: string;
+    noticeSelfListening: string;
     engineBuiltin: string;
     engineBrowser: string;
     engineSf: string;
@@ -564,11 +576,23 @@ export const COPY: Record<Lang, Copy> = {
       keyProviderBrowser: "浏览器自带（免费）",
       keyProviderSf: "硅基流动 · 国内可充值",
       keyProviderAai: "AssemblyAI · 海外",
-      noticeClarified: (ms) => `听清了大致意思（${ms} 毫秒）。下面是几条通顺的说法，选一条，或者自己改。`,
-      noticeFallback: "这几条是按常见说法给的，不一定是你想说的。可以自己改，或者再说一次。",
-      fragmentLabel: "识别到的片段",
+      noticeClarified: (ms) => `补好了（${ms} 毫秒）。这是几条通顺的说法，选一条，或者自己改。`,
+      noticeClarifyFallback: "模型没接上，先把识别到的原话放在这儿，你可以直接改。",
+      noticeClarifying: "正在把你说的话补成完整句子…",
+      noticeReplied: (ms) => `按对方的问题生成了三条（${ms} 毫秒）。挑一条，或者改一改。`,
+      noticeQuestionReady: "问题已经填好。点「给我几个说法」，我按这个问题生成回答。",
+      noticeFallback: "模型暂时没接上，这几条是按常见说法给的。可以自己改，或者再点一次。",
+      fragmentLabel: "你说的话（识别片段）",
       authorship: "你永远是表达的主人",
       authorshipHint: "AI 只负责把话理顺，选哪句、怎么改、什么时候念，都由你决定。",
+      micOnSelf: "正在听你说",
+      modeListenTitle: "听对方说",
+      modeListenHint: "录下对方的问题，我再给回答",
+      modeSelfTitle: "我自己说",
+      modeSelfHint: "我说不清楚，让它补成通顺的话",
+      startSelf: "开始说，我听着",
+      noticeSelfStart: "准备好就说，说完停一下我就知道你说完了。",
+      noticeSelfListening: "我在听。说不清楚也没关系，我会结合上下文猜你想说什么。",
       engineBuiltin: "当前已启用云端识别，开箱可用，不用配置。",
       engineBrowser: "当前用的是浏览器自带识别（可能受网络限制）。",
       engineSf: "当前用的是硅基流动语音识别。",
@@ -866,11 +890,23 @@ export const COPY: Record<Lang, Copy> = {
       keyProviderBrowser: "Browser built-in (free)",
       keyProviderSf: "SiliconFlow · China",
       keyProviderAai: "AssemblyAI · global",
-      noticeClarified: (ms) => `Got the gist (${ms} ms). Pick one of these, or edit it yourself.`,
-      noticeFallback: "These are common phrasings — not necessarily what you meant. Edit, or say it again.",
-      fragmentLabel: "Recognised fragment",
+      noticeClarified: (ms) => `Smoothed it out (${ms} ms). Pick one, or edit it yourself.`,
+      noticeClarifyFallback: "The model didn't answer — here is what was recognised, edit it directly.",
+      noticeClarifying: "Turning what you said into a full sentence…",
+      noticeReplied: (ms) => `Three replies for that question (${ms} ms). Pick one, or edit it.`,
+      noticeQuestionReady: "Question filled in. Tap “Suggest replies” to generate answers.",
+      noticeFallback: "The model is unavailable — these are common phrasings. Edit, or try again.",
+      fragmentLabel: "What you said (recognised)",
       authorship: "You are always the author",
       authorshipHint: "The model only smooths the words. You choose the sentence, edit it, and decide when it speaks.",
+      micOnSelf: "Listening to you",
+      modeListenTitle: "Hear them out",
+      modeListenHint: "Record their question, I draft an answer",
+      modeSelfTitle: "I'll speak",
+      modeSelfHint: "My speech is unclear — smooth it for me",
+      startSelf: "Start talking, I'm listening",
+      noticeSelfStart: "Speak when ready; pause and I'll know you finished.",
+      noticeSelfListening: "I'm listening. Unclear is fine — I'll infer from context.",
       engineBuiltin: "Cloud recognition is on and ready — nothing to configure.",
       engineBrowser: "Using the browser's built-in recognition (may be blocked).",
       engineSf: "Using SiliconFlow recognition.",

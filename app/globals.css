@@ -3423,3 +3423,51 @@ html[lang^="zh"] .studio-content .workspace-intro h1 {
   box-shadow: inset 0 0 0 1.5px var(--signal);
   flex: none;
 }
+
+/* ── 两个入口：听对方说 / 我自己说 ─────────────────────── */
+.conversation-modes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 12px 0 14px;
+}
+.mode-card {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s, color 0.18s, transform 0.14s;
+}
+.mode-card svg { color: var(--muted); transition: color 0.18s; }
+.mode-card strong {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.mode-card span {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.mode-card:hover:not(:disabled) {
+  border-color: var(--signal);
+  transform: translateY(-1px);
+}
+.mode-card.is-on {
+  border-color: var(--signal);
+  background: var(--soft);
+  box-shadow: 0 0 0 3px rgba(104, 70, 220, 0.08);
+}
+.mode-card.is-on svg { color: var(--signal); }
+.mode-card:disabled { opacity: 0.5; cursor: not-allowed; }
+
+@media (max-width: 640px) {
+  .conversation-modes { grid-template-columns: 1fr; }
+  .mode-card { grid-template-columns: auto 1fr; align-items: center; }
+  .mode-card span { grid-column: 2; }
+}
