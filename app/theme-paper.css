@@ -1,0 +1,1422 @@
+/* ============================================================
+   视觉重构 · 纸与墨
+   ------------------------------------------------------------
+   只覆盖样式，不动任何结构。目标：去掉模板感，做成印刷物的质感。
+   - 纸：暖米白，不是灰白
+   - 墨：暖黑，不是纯黑
+   - 强调：朱砂红，一个，不铺开
+   - 形状：几乎方（2px），不用大圆角
+   - 层次：靠线和留白，不靠阴影和渐变
+   ============================================================ */
+
+:root {
+  /* 纸与墨 */
+  --paper: #f6f3ec;
+  --surface: #fffdf8;
+  --ink: #1c1a17;
+  --muted: #6f685c;
+  --line: #ddd7cb;
+  --signal: #c0392b;
+  --soft: #f0e7dd;
+  --sage: #eae4d8;
+
+  /* 深色版面（示例舞台）：旧油墨，不是紫 */
+  --ink-deep: #221c17;
+  --ink-deep-2: #2b241e;
+  --on-deep: #f2ece1;
+  --on-deep-dim: #b6a894;
+
+  --mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, Consolas, monospace;
+  --sans: "Instrument Sans Variable", "Instrument Sans", -apple-system, "Segoe UI",
+    "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+  --serif: "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC", Georgia, serif;
+
+  --hair: #ddd7cb;
+  --faint: #8d8577;
+  --radius: 2px;
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+}
+
+/* 细节：选中态用朱砂淡底 */
+::selection {
+  background: rgba(192, 57, 43, 0.16);
+  color: var(--ink);
+}
+
+/* ── 顶栏：细线，去掉药丸按钮的圆润感 ─────────────────── */
+
+.site-nav,
+.studio-nav {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 14px;
+}
+
+.site-nav nav a,
+.quiet-link {
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  color: var(--muted);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.16s, border-color 0.16s;
+}
+.site-nav nav a:hover,
+.quiet-link:hover {
+  color: var(--ink);
+  border-bottom-color: var(--signal);
+}
+
+.brand span {
+  font-family: var(--serif);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.brand svg {
+  color: var(--signal);
+}
+.brand-dot {
+  color: var(--signal);
+}
+
+/* 语言切换：改成方形线框 */
+.lang-button,
+.icon-button {
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-size: 12.5px;
+  transition: color 0.16s, border-color 0.16s;
+}
+.lang-button:hover,
+.icon-button:hover {
+  color: var(--ink);
+  border-color: var(--ink);
+}
+.lang-button .lang-glyph {
+  border: 0;
+  padding: 0;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 1;
+}
+
+/* 主按钮：墨黑实心，方角 */
+.button,
+.button.primary {
+  border-radius: var(--radius);
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: none;
+  transition: background 0.16s, color 0.16s, border-color 0.16s;
+}
+.button:hover:not(:disabled),
+.button.primary:hover:not(:disabled) {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: #fff;
+  transform: none;
+}
+.button:disabled {
+  opacity: 0.42;
+}
+
+/* ── 首页 ─────────────────────────────────────────────── */
+
+.award-note {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  gap: 8px;
+}
+.award-note svg {
+  color: var(--signal);
+}
+
+.hero h1 {
+  font-family: var(--serif);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.hero h1 > span {
+  color: var(--signal);
+  font-style: normal;
+}
+
+.hero-aside > p {
+  color: var(--muted);
+}
+
+.hero-footnote {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.principle-strip {
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.principle-strip strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--signal);
+}
+
+.section-heading h2,
+.closing-section h2,
+.trust-heading h2,
+.everyday-copy h2 {
+  font-family: var(--serif);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.section-heading h2 span,
+.closing-section h2 span,
+.trust-heading h2 span,
+.everyday-copy h2 span {
+  color: var(--signal);
+  font-style: normal;
+}
+.section-heading > p {
+  color: var(--muted);
+}
+
+/* 特性卡：细线方框，不用圆角阴影 */
+.feature-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: none;
+  transition: border-color 0.18s;
+}
+.feature-card:hover {
+  border-color: var(--ink);
+  box-shadow: none;
+  transform: none;
+}
+.feature-card h3 {
+  font-family: var(--serif);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.feature-card > p {
+  color: var(--muted);
+}
+.feature-top > span:last-child {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.feature-icon {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--signal);
+}
+
+.mini-composer,
+.mini-revision,
+.mini-listener {
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--paper);
+}
+
+/* 短语库预览 */
+.phrase-preview {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.phrase-preview > a {
+  border-radius: 0;
+  border-bottom: 1px solid var(--line);
+}
+.phrase-preview > a:hover {
+  background: var(--soft);
+}
+.phrase-letter {
+  border-radius: var(--radius);
+  font-family: var(--serif);
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+
+.trust-section,
+.everyday-section {
+  border-top: 1px solid var(--line);
+}
+
+.closing-section {
+  border-top: 1px solid var(--line);
+}
+.closing-wave i {
+  background: var(--ink);
+  opacity: 0.75;
+}
+
+.site-footer {
+  border-top: 1px solid var(--line);
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.site-footer a {
+  color: var(--ink);
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+}
+.site-footer a:hover {
+  border-bottom-color: var(--signal);
+  color: var(--signal);
+}
+
+/* ── 示例舞台：旧油墨深色版 ───────────────────────────── */
+
+.demo-card,
+.choreography-demo {
+  background: var(--ink-deep);
+  border-radius: var(--radius);
+  box-shadow: 0 30px 60px -50px rgba(28, 26, 23, 0.6);
+  color: var(--on-deep);
+}
+
+.demo-top {
+  border-bottom: 1px solid rgba(242, 236, 225, 0.12);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(242, 236, 225, 0.5);
+}
+.demo-top .status-dot {
+  background: var(--signal);
+}
+
+.choreography-kicker {
+  color: rgba(242, 236, 225, 0.42);
+  font-family: var(--mono);
+  letter-spacing: 0.16em;
+}
+.choreography-toolbar h2 {
+  font-family: var(--serif);
+  font-weight: 600;
+  color: var(--on-deep);
+  letter-spacing: 0;
+}
+
+/* 章节切换：方形，选中用纸色 */
+.chapter-switch button {
+  border-radius: var(--radius);
+  border: 1px solid rgba(242, 236, 225, 0.16);
+  background: transparent;
+  color: rgba(242, 236, 225, 0.55);
+  font-family: var(--sans);
+  font-size: 12.5px;
+  transition: all 0.16s;
+}
+.chapter-switch button span {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  opacity: 0.6;
+}
+.chapter-switch button:hover {
+  border-color: rgba(242, 236, 225, 0.4);
+  color: var(--on-deep);
+}
+.chapter-switch button[aria-selected="true"],
+.chapter-switch button[aria-pressed="true"] {
+  background: var(--on-deep);
+  border-color: var(--on-deep);
+  color: var(--ink-deep);
+}
+.chapter-switch button[aria-selected="true"] span,
+.chapter-switch button[aria-pressed="true"] span {
+  opacity: 0.55;
+}
+
+/* 舞台里的两张纸 */
+.source-document {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: none;
+  border: 1px solid rgba(28, 26, 23, 0.08);
+}
+.document-heading,
+.spoken-heading {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.source-sentence,
+.spoken-sentence {
+  font-family: var(--serif);
+  letter-spacing: 0.01em;
+}
+.spoken-sentence {
+  color: var(--on-deep);
+}
+.speech-word.awaiting-word {
+  color: rgba(242, 236, 225, 0.34);
+}
+.speech-word.has-played {
+  color: var(--on-deep);
+}
+.speech-word.current-word {
+  color: var(--ink-deep);
+  background: var(--on-deep);
+}
+.source-sentence .source-active {
+  background: rgba(192, 57, 43, 0.16);
+}
+.source-sentence .revised-word {
+  background: rgba(192, 57, 43, 0.14);
+  box-shadow: inset 0 -2px 0 var(--signal);
+}
+
+.speech-track {
+  background: rgba(242, 236, 225, 0.1);
+}
+.speech-cut {
+  background: var(--signal);
+}
+.halt-stamp {
+  border: 1px solid rgba(192, 57, 43, 0.6);
+  color: #e07a68;
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  letter-spacing: 0.14em;
+}
+.revision-receipt {
+  color: rgba(242, 236, 225, 0.55);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+
+.choreography-actions > p {
+  color: rgba(242, 236, 225, 0.55);
+  font-size: 12.5px;
+}
+.choreography-actions .button.primary {
+  background: var(--on-deep);
+  border-color: var(--on-deep);
+  color: var(--ink-deep);
+}
+.choreography-actions .button.primary:hover {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: #fff;
+}
+
+.sculpture-picker {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(242, 236, 225, 0.4);
+}
+.sculpture-picker button {
+  border-radius: var(--radius);
+  border: 1px solid rgba(242, 236, 225, 0.16);
+  background: transparent;
+  color: rgba(242, 236, 225, 0.55);
+  font-family: var(--sans);
+  font-size: 11.5px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.sculpture-picker button[aria-pressed="true"] {
+  background: rgba(242, 236, 225, 0.14);
+  border-color: rgba(242, 236, 225, 0.5);
+  color: var(--on-deep);
+}
+
+/* ── 工作室 ───────────────────────────────────────────── */
+
+.studio-shell {
+  background: var(--paper);
+}
+
+.workspace-label,
+.studio-preferences .icon-button span {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+.workspace-intro h1 {
+  font-family: var(--serif);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.workspace-intro > p {
+  color: var(--muted);
+}
+
+.panel-index {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  color: var(--faint);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: transparent;
+}
+.panel-index.coral {
+  color: var(--signal);
+  border-color: rgba(192, 57, 43, 0.35);
+}
+
+.panel-heading h2 {
+  font-family: var(--serif);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+.editor-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: none;
+}
+.editor-card:focus-within {
+  border-color: var(--ink);
+  box-shadow: none;
+}
+.editor-top,
+.editor-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.editor-card textarea {
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.85;
+  color: var(--ink);
+}
+
+.text-button {
+  color: var(--muted);
+  border-radius: 0;
+  font-size: 12.5px;
+  transition: color 0.16s;
+}
+.text-button:hover:not(:disabled) {
+  color: var(--signal);
+}
+
+.voice-settings select,
+.question-editor select {
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+}
+.voice-settings > span {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.voice-audition {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.voice-audition > p {
+  font-size: 11.5px;
+  color: var(--faint);
+}
+
+.speak-button,
+.stop-button,
+.show-button {
+  border-radius: var(--radius);
+  box-shadow: none;
+}
+.speak-button {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.speak-button:hover:not(:disabled) {
+  background: var(--signal);
+  border-color: var(--signal);
+}
+.speak-button kbd {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  border: 1px solid rgba(246, 243, 236, 0.3);
+  border-radius: 1px;
+  padding: 1px 4px;
+  background: transparent;
+}
+.stop-button,
+.show-button {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+}
+.stop-button:hover:not(:disabled),
+.show-button:hover:not(:disabled) {
+  border-color: var(--ink);
+  background: var(--soft);
+}
+.stop-button kbd {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--faint);
+  border: 1px solid var(--line);
+  border-radius: 1px;
+  padding: 1px 4px;
+}
+
+.data-note {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--faint);
+  border-left: 1px solid var(--line);
+  padding-left: 10px;
+}
+
+.phrase-heading h3 {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+.phrase-heading > span {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--faint);
+}
+.count-badge {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--muted);
+  padding: 0 4px;
+}
+
+.starter-grid button {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 14px;
+  transition: border-color 0.16s, background 0.16s;
+}
+.starter-grid button:hover {
+  border-color: var(--ink);
+  background: var(--soft);
+}
+.starter-grid button svg {
+  color: var(--faint);
+}
+
+.saved-phrase {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-family: var(--serif);
+  font-size: 14px;
+}
+.saved-phrase:hover {
+  border-color: var(--ink);
+}
+.saved-empty,
+.replies-empty,
+.history-empty {
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  color: var(--faint);
+}
+
+/* 播放面板：深色油墨 */
+.output-card {
+  border-radius: var(--radius);
+  background: var(--ink-deep);
+  border: 1px solid var(--ink-deep);
+  color: var(--on-deep);
+  box-shadow: none;
+}
+.output-card.is-stopped {
+  border-color: rgba(192, 57, 43, 0.5);
+}
+.output-card.is-error {
+  border-color: rgba(192, 57, 43, 0.7);
+}
+.revise-button {
+  border: 1px solid rgba(242, 236, 225, 0.22);
+  border-radius: var(--radius);
+  color: var(--on-deep);
+  background: transparent;
+}
+.revise-button:hover {
+  border-color: var(--on-deep);
+  background: rgba(242, 236, 225, 0.08);
+}
+
+.session-notice {
+  font-size: 12.5px;
+  color: var(--muted);
+  border-left: 2px solid var(--line);
+  padding-left: 10px;
+}
+.session-notice.error {
+  color: var(--signal);
+  border-left-color: var(--signal);
+}
+
+.history-section .phrase-heading {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 8px;
+}
+.history-entries li,
+.history-entry {
+  border-bottom: 1px solid var(--line);
+}
+.history-status {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.session-details summary {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.session-details p,
+.session-details li {
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+/* 听音区 */
+.conversation-assist {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.conversation-heading h2 {
+  font-family: var(--serif);
+  font-weight: 600;
+}
+.listen-state {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.listening-privacy,
+.listening-engine {
+  font-size: 11.5px;
+  color: var(--faint);
+}
+.listening-engine::before {
+  background: var(--signal);
+}
+
+.mode-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--muted);
+}
+.mode-card strong {
+  font-family: var(--serif);
+  font-size: 15px;
+  color: var(--ink);
+}
+.mode-card.is-on {
+  border-color: var(--ink);
+  background: var(--soft);
+  box-shadow: none;
+}
+.mode-card.is-on svg {
+  color: var(--signal);
+}
+.mode-card:hover:not(:disabled) {
+  border-color: var(--ink);
+}
+
+.listen-button {
+  border-radius: var(--radius);
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.listen-button:hover:not(:disabled) {
+  background: var(--signal);
+  border-color: var(--signal);
+}
+
+.authorship-note {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.authorship-note::before {
+  border-radius: 0;
+  background: var(--signal);
+  box-shadow: none;
+}
+
+.question-panel,
+.reply-panel {
+  background: var(--surface);
+}
+.question-panel {
+  border-right: 1px solid var(--line);
+}
+.heard-question {
+  font-family: var(--serif);
+  color: var(--ink);
+}
+.heard-fragment {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--faint);
+  border-left: 1px solid var(--line);
+}
+
+/* 候选卡：白纸 + 朱砂强调，不用彩色渐变 */
+.reply-option {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: none;
+  transition: border-color 0.16s;
+}
+.reply-option:hover {
+  border-color: var(--ink);
+}
+.reply-option p {
+  font-family: var(--serif);
+  color: var(--ink);
+}
+.reply-chosen {
+  border-color: var(--signal);
+  background: rgba(192, 57, 43, 0.05);
+}
+.reply-speak,
+.reply-edit {
+  border-radius: var(--radius);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+}
+.reply-speak:hover:not(:disabled) {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.reply-edit:hover:not(:disabled) {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.reply-option.reply-chosen .reply-speak {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: #fff;
+}
+
+.intent-form label {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.intent-form p {
+  color: var(--faint);
+  font-size: 11.5px;
+}
+.intent-form input {
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+}
+.intent-form input:focus {
+  border-color: var(--ink);
+  outline: none;
+}
+.intent-form .button {
+  border-radius: var(--radius);
+}
+
+.question-editor {
+  border-top: 1px solid var(--line);
+  padding-top: 10px;
+}
+.question-editor summary {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  color: var(--faint);
+}
+.question-editor textarea {
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+}
+.question-editor textarea:focus {
+  border-color: var(--ink);
+  outline: none;
+}
+.question-editor .button {
+  border-radius: var(--radius);
+}
+
+/* 步骤条 */
+.stage-steps li {
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: transparent;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.stage-steps li[data-on="true"] {
+  color: var(--ink);
+  border-color: var(--line);
+}
+.stage-steps li[data-active="true"] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+
+/* 弹窗 */
+.listener-dialog {
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  box-shadow: 0 40px 80px -60px rgba(28, 26, 23, 0.7);
+}
+.listener-dialog .eyebrow {
+  color: var(--signal);
+}
+.listener-message {
+  font-family: var(--serif);
+  color: var(--ink);
+}
+.listener-dialog footer {
+  border-top: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+/* 移动端固定条 */
+.mobile-playback {
+  border-radius: var(--radius);
+  background: var(--ink-deep);
+  color: var(--on-deep);
+  box-shadow: 0 20px 40px -30px rgba(28, 26, 23, 0.8);
+}
+.mobile-playback .button {
+  background: var(--on-deep);
+  border-color: var(--on-deep);
+  color: var(--ink-deep);
+}
+
+/* 无障碍：高对比 */
+.high-contrast {
+  --paper: #ffffff;
+  --surface: #ffffff;
+  --ink: #000000;
+  --muted: #333333;
+  --line: #999999;
+  --signal: #b3261e;
+}
+.high-contrast .button.primary,
+.high-contrast .speak-button,
+.high-contrast .listen-button {
+  background: #000;
+  border-color: #000;
+  color: #fff;
+}
+.high-contrast .output-card {
+  background: #000;
+  border-color: #000;
+}
+
+/* 深色区文字在任何情况下都要能读 */
+.demo-card .button.primary,
+.choreography-demo .button.primary {
+  color: var(--ink-deep);
+}
+
+/* 中文排版微调 */
+html[lang^="zh"] .hero h1,
+html[lang^="zh"] .section-heading h2,
+html[lang^="zh"] .closing-section h2,
+html[lang^="zh"] .trust-heading h2,
+html[lang^="zh"] .everyday-copy h2,
+html[lang^="zh"] .choreography-toolbar h2,
+html[lang^="zh"] .workspace-intro h1,
+html[lang^="zh"] .panel-heading h2,
+html[lang^="zh"] .conversation-heading h2,
+html[lang^="zh"] .feature-card h3 {
+  font-family: var(--serif);
+  letter-spacing: 0.005em;
+}
+
+/* ── 细节修正 ─────────────────────────────────────────── */
+
+/* 雕像画布：融进深色版面，不要一块浅色方块 */
+.speech-track.sculpture-track {
+  background: transparent;
+  border-color: rgba(242, 236, 225, 0.1);
+}
+.voice-sculpture,
+.voice-sculpture canvas {
+  background: transparent;
+}
+
+/* 顶栏偏好按钮：给点间隙，别挤成一排 */
+.studio-preferences {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.studio-preferences .icon-button {
+  padding: 7px 11px;
+}
+.site-nav-actions {
+  gap: 10px;
+}
+
+/* 空态虚线框：淡一点，别抢戏 */
+.replies-empty,
+.saved-empty,
+.history-empty {
+  border-color: rgba(221, 215, 203, 0.8);
+  background: transparent;
+  padding: 22px 20px;
+}
+.replies-empty > span,
+.history-empty p,
+.saved-empty p {
+  color: var(--faint);
+}
+
+/* 「输入或修改问题」上方的分隔线：短一点、淡一点 */
+.question-editor {
+  border-top: 1px solid var(--line);
+  margin-top: 14px;
+  padding-top: 12px;
+}
+
+/* 听音底的横线 */
+.conversation-notice {
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* 候选区标题与标语之间的呼吸 */
+.authorship-note {
+  margin: 4px 0 14px;
+  gap: 7px;
+}
+.authorship-note::before {
+  width: 12px;
+  height: 2px;
+}
+
+/* 模式卡：选中态用左侧朱砂竖条，比整块底色更有印刷感 */
+.mode-card.is-on {
+  background: var(--surface);
+  border-color: var(--ink);
+  box-shadow: inset 3px 0 0 var(--signal);
+}
+
+/* 章节选中：纸色实心，数字用朱砂 */
+.chapter-switch button[aria-selected="true"] span,
+.chapter-switch button[aria-pressed="true"] span {
+  color: var(--signal);
+  opacity: 1;
+}
+
+/* 顶栏品牌与导航之间的竖线 */
+.workspace-label {
+  border-left: 1px solid var(--line);
+  padding-left: 14px;
+}
+
+/* 正文里的小图标统一细一点 */
+.feature-icon svg,
+.mode-card svg,
+.award-note svg {
+  stroke-width: 1.6;
+}
+
+/* 滚动条与纸色一致 */
+.script-scroll::-webkit-scrollbar-thumb,
+.console::-webkit-scrollbar-thumb {
+  background: rgba(28, 26, 23, 0.16);
+}
+
+/* ── 候选列表：10 条要能一屏扫完，不能像表格 ─────────────── */
+
+.reply-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.reply-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 12px;
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  background: transparent;
+  border-radius: 0;
+  transition: background 0.14s;
+  animation: none;
+}
+.reply-option:first-child {
+  border-top: 1px solid var(--line);
+}
+.reply-option:last-child {
+  border-bottom: 1px solid var(--line);
+}
+.reply-option:hover {
+  background: var(--soft);
+  border-color: var(--line);
+}
+.reply-option p {
+  font-family: var(--serif);
+  font-size: 15.5px;
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  margin: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* 两个动作并排、小一号 */
+.reply-option > div {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+}
+.reply-speak,
+.reply-edit {
+  min-height: 30px;
+  height: 30px;
+  padding: 0 9px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  gap: 5px;
+  white-space: nowrap;
+}
+.reply-speak svg,
+.reply-edit svg {
+  width: 13px;
+  height: 13px;
+}
+.reply-speak:hover:not(:disabled) {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.reply-edit {
+  border-color: transparent;
+}
+.reply-edit:hover:not(:disabled) {
+  border-color: var(--line);
+  color: var(--ink);
+  background: transparent;
+}
+.reply-chosen {
+  background: rgba(192, 57, 43, 0.05);
+  border-color: rgba(192, 57, 43, 0.3);
+}
+.reply-option.reply-chosen .reply-speak {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: #fff;
+}
+
+/* 大字模式：候选也跟着放大，但保持行式 */
+.large-type .reply-option p {
+  font-size: 19px;
+}
+.large-type .reply-speak,
+.large-type .reply-edit {
+  height: 36px;
+  min-height: 36px;
+  font-size: 11.5px;
+}
+
+/* 左侧问题区不必撑满，和右侧对齐视觉重心 */
+.question-panel {
+  display: flex;
+  flex-direction: column;
+}
+.question-panel .heard-question {
+  margin-bottom: 0;
+}
+
+/* 「你永远是表达的主人」：去掉短横线，改一个细方点 */
+.authorship-note::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  background: var(--signal);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+@media (max-width: 700px) {
+  .reply-option {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 12px 0;
+  }
+  .reply-option p {
+    flex: 1 1 100%;
+    font-size: 16px;
+  }
+  .reply-option > div {
+    flex: 1 1 100%;
+    justify-content: flex-end;
+  }
+}
+
+/* ── 清掉原主题残留的紫调边框与底色 ─────────────────────── */
+
+.reply-option,
+.reply-option:last-child {
+  border-color: var(--line);
+}
+.reply-option:first-child {
+  border-top-color: var(--line);
+}
+.intent-form {
+  border-top-color: var(--line);
+}
+.question-editor textarea,
+.question-editor select {
+  border-color: var(--line);
+}
+.conversation-notice {
+  border-top-color: var(--line);
+}
+.reply-panel {
+  border-left-color: var(--line);
+}
+.question-panel {
+  border-right-color: var(--line);
+}
+.reply-speak {
+  background: transparent;
+}
+.high-contrast .reply-speak {
+  background: transparent;
+  color: var(--ink);
+}
+
+/* 左侧问题区顶部与右侧候选对齐 */
+.question-panel .conversation-label,
+.reply-panel .conversation-label {
+  min-height: 18px;
+}
+
+/* intent 表单和手写按钮之间的呼吸 */
+.intent-form {
+  margin-top: 20px;
+  padding-top: 16px;
+}
+.intent-form input {
+  min-height: 42px;
+}
+.intent-form .button {
+  min-height: 42px;
+  margin-top: 8px;
+}
+
+/* 空状态的字数提示不要压着底部 */
+.editor-meta {
+  margin-top: 6px;
+}
+
+/* ── 移动端顶栏：小屏只留图标，别把字挤成两行 ────────────── */
+
+@media (max-width: 760px) {
+  .studio-nav {
+    gap: 10px;
+    flex-wrap: nowrap;
+  }
+  .studio-nav .brand span {
+    font-size: 17px;
+  }
+  .studio-preferences {
+    gap: 6px;
+    flex-wrap: nowrap;
+  }
+  .studio-preferences .icon-button {
+    min-width: 38px;
+    padding: 7px 9px;
+    gap: 0;
+  }
+  /* 偏好按钮只显示图标 */
+  .studio-preferences .icon-button span:not(.lang-glyph) {
+    display: none;
+  }
+  /* 语言按钮只留 EN / 中 */
+  .studio-preferences .lang-button {
+    min-width: 40px;
+    padding: 7px 9px;
+  }
+  .studio-preferences .lang-button span:last-child {
+    display: none;
+  }
+  /* 返回链接只留箭头 */
+  .back-link {
+    font-size: 0;
+    gap: 0;
+    padding: 0;
+  }
+  .back-link svg {
+    width: 18px;
+    height: 18px;
+  }
+  .workspace-label {
+    display: none;
+  }
+  .studio-nav {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+@media (max-width: 460px) {
+  .studio-nav .brand span {
+    font-size: 16px;
+  }
+  .studio-preferences .icon-button {
+    min-width: 34px;
+    padding: 6px 7px;
+  }
+  .studio-preferences .lang-button {
+    min-width: 36px;
+  }
+}
+
+/* 禁用态更明确：不要让人以为点了没反应 */
+.button.primary:disabled,
+.listen-button:disabled,
+.speak-button:disabled {
+  background: var(--line);
+  border-color: var(--line);
+  color: rgba(28, 26, 23, 0.42);
+  opacity: 1;
+}
+
+/* 首页移动端顶栏同理 */
+@media (max-width: 760px) {
+  .site-nav {
+    flex-wrap: nowrap;
+    gap: 10px;
+  }
+  .site-nav nav {
+    display: none;
+  }
+  .site-nav-actions {
+    gap: 6px;
+  }
+  .site-nav-actions .lang-button {
+    min-width: 38px;
+    padding: 7px 9px;
+  }
+  .site-nav-actions .button.primary {
+    padding: 9px 12px;
+    font-size: 13px;
+  }
+}
+
+/* 语言徽标不能被「隐藏按钮文字」那条规则误伤 */
+.studio-preferences .icon-button > span.lang-glyph,
+.site-nav-actions .icon-button > span.lang-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}

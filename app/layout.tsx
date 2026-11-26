@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "@fontsource-variable/instrument-sans";
 import "@fontsource-variable/jetbrains-mono";
 import "./globals.css";
+import "./theme-paper.css";
 import { LangProvider } from "@/components/lang-provider";
 
 export const metadata: Metadata = {
